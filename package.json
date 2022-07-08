@@ -1,0 +1,19 @@
+{
+  "name": "learning-compiler",
+  "version": "1.0.0",
+  "description": "学习编译原理",
+  "main": ".prettierrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xbzhang2020/learning-compiler.git"
+  },
+  "author": "xbzhang2020@icloud.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xbzhang2020/learning-compiler/issues"
+  },
+  "homepage": "https://github.com/xbzhang2020/learning-compiler#readme"
+}
