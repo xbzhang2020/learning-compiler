@@ -1,26 +1,4 @@
-// token 类型集合
-const TokenType = {
-  GE: 'GE', // >=
-  GT: 'GT', // >
-  EQ: 'EQ', // ==
-  LE: 'LE', // <=
-  LT: 'LT', // <
-
-  Identifier: 'Identifier', //标识符
-
-  NumberLiteral: 'NumberLiteral', //整型字面量
-}
-
-// Token 节点
-class Token {
-  constructor(type, text) {
-    this.type = type
-    this.text = text
-  }
-  appendText(c) {
-    this.text += c
-  }
-}
+import { Token, TokenType } from './token.mjs'
 
 // 有限自动机的状态集合
 const StateType = {
@@ -29,7 +7,7 @@ const StateType = {
 }
 
 let token = null // 当前token 节点
-let tokens = [] // token 节点列表
+const tokens = [] // token 节点列表
 
 // 初始化状态：当第一次判断状态或前一状态，重新初始化状态
 function initState(c) {
