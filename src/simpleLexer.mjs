@@ -4,6 +4,9 @@ import { Token, TokenType } from './token.mjs'
 const StateType = {
   ...TokenType,
   Initial: 'Initial',
+  Identifier_int1: 'Identifier_int1',
+  Identifier_int2: 'Identifier_int2',
+  Identifier_int3: 'Identifier_int3',
 }
 
 let token = null // 当前token 节点
@@ -16,20 +19,24 @@ function initState(c) {
   // 清空token
   if (token) {
     tokens.push(token)
+    token = null
   }
-  token = null
 
   if (isAlpha(c)) {
     token = new Token(TokenType.Identifier, c)
-    state = StateType.Identifier
+    if (c === 'i') {
+      state = StateType.Identifier_int1
+    } else {
+      state = StateType.Identifier
+    }
   }
 
   if (isNumber(c)) {
-    token = new Token(TokenType.NumberLiteral, c)
-    state = StateType.NumberLiteral
+    token = new Token(TokenType.IntLiteral, c)
+    state = StateType.IntLiteral
   }
 
-  if (c == '>') {
+  if (c === '>') {
     token = new Token(TokenType.GT, c)
     state = StateType.GT
   }
@@ -45,25 +52,53 @@ function transformState(state, c) {
     case StateType.Initial:
       newState = initState(c)
       break
-    case StateType.Identifier:
-      if (isAlpha(c) || isNumber(c)) {
-        token.text += c
+    case StateType.Identifier_int1:
+      if (c === 'n') {
+        newState = StateType.Identifier_int2
+        token.appendText(c)
+      } else if (isAlpha(c) || isNumber(c)) {
+        newState = StateType.Identifier
+        token.appendText(c)
       } else {
         newState = initState(c)
       }
       break
-    case StateType.NumberLiteral:
+    case StateType.Identifier_int2:
+      if (c === 't') {
+        newState = StateType.Identifier_int3
+        token.appendText(c)
+      } else {
+        newState = initState(c)
+      }
+      break
+    case StateType.Identifier_int3:
+      if (isBlank(c)) {
+        token.type = TokenType.Int
+        newState = initState(c)
+      } else {
+        newState = StateType.Identifier
+        token.appendText(c)
+      }
+      break
+    case StateType.Identifier:
+      if (isAlpha(c) || isNumber(c)) {
+        token.appendText(c)
+      } else {
+        newState = initState(c)
+      }
+      break
+    case StateType.IntLiteral:
       if (isNumber(c)) {
-        token.text += c
+        token.appendText(c)
       } else {
         newState = initState(c)
       }
       break
     case StateType.GT:
       if (c === '=') {
-        token.type = TokenType.GE
-        token.text += c
         newState = StateType.GE
+        token.type = TokenType.GE
+        token.appendText(c)
       }
       break
     default:
@@ -84,7 +119,7 @@ function tokenize(data) {
     tokens.push(token)
   }
 
-  console.log(tokens)
+  return tokens
 }
 
 // 判断字符是否是字母
@@ -98,10 +133,21 @@ function isNumber(c) {
   return '0' <= c && '9' >= c
 }
 
+// 判断是否为空
+function isBlank(c) {
+  return ' ' === c
+}
+
 // 测试代码
 function test1() {
   let input = 'age1 >= 18'
   tokenize(input)
 }
 
-test1()
+function test2() {
+  let input = 'int age = 10'
+  const res = tokenize(input)
+  console.log(res)
+}
+
+test2()
