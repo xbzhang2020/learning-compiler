@@ -18,6 +18,9 @@ export const TokenType = {
   Assignment: '=',
 
   Int: 'Int',
+
+  LeftParen: '(',
+  RightParen: ')',
 }
 
 // Token 节点
@@ -26,6 +29,7 @@ export class Token {
     this.type = type
     this.text = text
   }
+
   appendText(c) {
     this.text += c
   }

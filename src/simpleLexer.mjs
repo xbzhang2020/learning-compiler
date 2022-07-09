@@ -27,27 +27,40 @@ function initToken(c) {
   }
 
   if (isAlpha(c)) {
-    token = new Token(TokenType.Identifier, c)
     if (c === 'i') {
+      token = new Token(TokenType.Int, c)
       state = StateType.Identifier_int1
     } else {
+      token = new Token(TokenType.Identifier, c)
       state = StateType.Identifier
     }
-  }
-
-  if (isDigit(c)) {
+  } else if (isDigit(c)) {
     token = new Token(TokenType.IntLiteral, c)
     state = StateType.IntLiteral
-  }
-
-  if (c === '>') {
+  } else if (c === '>') {
     token = new Token(TokenType.GT, c)
     state = StateType.GT
-  }
-
-  if (c === '=') {
+  } else if (c === '=') {
     token = new Token(TokenType.Assignment, c)
     state = StateType.Assignment
+  } else if (c === '+') {
+    token = new Token(TokenType.Plus, c)
+    state = StateType.Plus
+  } else if (c === '-') {
+    token = new Token(TokenType.Minus, c)
+    state = StateType.Minus
+  } else if (c === '*') {
+    token = new Token(TokenType.Star, c)
+    state = StateType.Star
+  } else if (c === '/') {
+    token = new Token(TokenType.Slash, c)
+    state = StateType.Slash
+  } else if (c === '(') {
+    token = new Token(TokenType.LeftParen, c)
+    state = StateType.LeftParen
+  } else if (c === ')') {
+    token = new Token(TokenType.RightParen, c)
+    state = StateType.RightParen
   }
 
   return state
@@ -108,10 +121,10 @@ function transformState(state, c) {
       break
     case StateType.Identifier_int3:
       if (isBlank(c)) {
-        token.type = TokenType.Int
         newState = initToken(c)
       } else {
         newState = StateType.Identifier
+        token.type = TokenType.Identifier
         token.appendText(c)
       }
       break
@@ -152,16 +165,31 @@ function isBlank(c) {
   return ' ' === c
 }
 
-// 测试代码
+/**
+ * 测试代码
+ */
 function test1() {
   let input = 'age1 >= 18'
-  tokenize(input)
-}
-
-function test2() {
-  let input = 'int age = 10'
   const res = tokenize(input)
   console.log(res)
 }
 
-test2()
+function test2() {
+  let input = 'int age = 18'
+  const res = tokenize(input)
+  console.log(res)
+}
+
+function test3() {
+  let input = '2*3+4'
+  const res = tokenize(input)
+  console.log(res)
+}
+
+function test4() {
+  let input = '2*(3+4)'
+  const res = tokenize(input)
+  console.log(res)
+}
+
+test4()
