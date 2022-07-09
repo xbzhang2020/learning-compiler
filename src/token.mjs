@@ -15,7 +15,7 @@ export const TokenType = {
 
   Identifier: 'Identifier', // 标识符
   IntLiteral: 'IntLiteral', // 整型字面量
-  Assignment: '=',
+  Assignment: 'Assignment',
 
   Int: 'Int',
 

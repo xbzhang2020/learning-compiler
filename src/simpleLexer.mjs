@@ -149,6 +149,12 @@ function tokenize(data) {
   return tokens
 }
 
+function printTokens(tokens) {
+  for (const item of tokens) {
+    console.log(item.type, item.text)
+  }
+}
+
 // 判断字符是否是字母
 function isAlpha(c) {
   const temp = c.toLowerCase()
@@ -177,7 +183,7 @@ function test1() {
 function test2() {
   let input = 'int age = 18'
   const res = tokenize(input)
-  console.log(res)
+  printTokens(res)
 }
 
 function test3() {
@@ -192,4 +198,4 @@ function test4() {
   console.log(res)
 }
 
-test4()
+test2()
