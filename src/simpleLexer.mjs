@@ -12,11 +12,15 @@ const StateType = {
 let token = null // 当前token 节点
 const tokens = [] // token 节点列表
 
-// 初始化状态：当第一次判断状态或前一状态，重新初始化状态
-function initState(c) {
+/**
+ * 初始化 token
+ * @param {*} c 当前字符
+ * @returns 初始化后的状态
+ */
+function initToken(c) {
   let state = StateType.Initial
 
-  // 清空token
+  // 将之前的token添加到tokens列表中
   if (token) {
     tokens.push(token)
     token = null
@@ -31,7 +35,7 @@ function initState(c) {
     }
   }
 
-  if (isNumber(c)) {
+  if (isDigit(c)) {
     token = new Token(TokenType.IntLiteral, c)
     state = StateType.IntLiteral
   }
@@ -41,57 +45,39 @@ function initState(c) {
     state = StateType.GT
   }
 
+  if (c === '=') {
+    token = new Token(TokenType.Assignment, c)
+    state = StateType.Assignment
+  }
+
   return state
 }
 
-// 状态转换机：根据当前状态和输入的字符，计算出下一时刻的状态
+/**
+ * 状态转换机：根据当前状态和输入的字符，计算出下一时刻的状态
+ * @param {*} state 当前状态
+ * @param {*} c 输入的字符
+ * @returns 下一时刻的状态
+ */
 function transformState(state, c) {
   let newState = state
 
   switch (state) {
     case StateType.Initial:
-      newState = initState(c)
-      break
-    case StateType.Identifier_int1:
-      if (c === 'n') {
-        newState = StateType.Identifier_int2
-        token.appendText(c)
-      } else if (isAlpha(c) || isNumber(c)) {
-        newState = StateType.Identifier
-        token.appendText(c)
-      } else {
-        newState = initState(c)
-      }
-      break
-    case StateType.Identifier_int2:
-      if (c === 't') {
-        newState = StateType.Identifier_int3
-        token.appendText(c)
-      } else {
-        newState = initState(c)
-      }
-      break
-    case StateType.Identifier_int3:
-      if (isBlank(c)) {
-        token.type = TokenType.Int
-        newState = initState(c)
-      } else {
-        newState = StateType.Identifier
-        token.appendText(c)
-      }
+      newState = initToken(c)
       break
     case StateType.Identifier:
-      if (isAlpha(c) || isNumber(c)) {
+      if (isAlpha(c) || isDigit(c)) {
         token.appendText(c)
       } else {
-        newState = initState(c)
+        newState = initToken(c)
       }
       break
     case StateType.IntLiteral:
-      if (isNumber(c)) {
+      if (isDigit(c)) {
         token.appendText(c)
       } else {
-        newState = initState(c)
+        newState = initToken(c)
       }
       break
     case StateType.GT:
@@ -101,8 +87,36 @@ function transformState(state, c) {
         token.appendText(c)
       }
       break
+    case StateType.Identifier_int1:
+      if (c === 'n') {
+        newState = StateType.Identifier_int2
+        token.appendText(c)
+      } else if (isAlpha(c) || isDigit(c)) {
+        newState = StateType.Identifier
+        token.appendText(c)
+      } else {
+        newState = initToken(c)
+      }
+      break
+    case StateType.Identifier_int2:
+      if (c === 't') {
+        newState = StateType.Identifier_int3
+        token.appendText(c)
+      } else {
+        newState = initToken(c)
+      }
+      break
+    case StateType.Identifier_int3:
+      if (isBlank(c)) {
+        token.type = TokenType.Int
+        newState = initToken(c)
+      } else {
+        newState = StateType.Identifier
+        token.appendText(c)
+      }
+      break
     default:
-      newState = initState(c)
+      newState = initToken(c)
   }
 
   return newState
@@ -129,7 +143,7 @@ function isAlpha(c) {
 }
 
 // 判断字符是否是数字
-function isNumber(c) {
+function isDigit(c) {
   return '0' <= c && '9' >= c
 }
 

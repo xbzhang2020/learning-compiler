@@ -7,8 +7,16 @@ export const TokenType = {
   LE: 'LE', // <=
   LT: 'LT', // <
 
+  // 数学运算
+  Plus: '+',
+  Minus: '-',
+  Star: '*',
+  Slash: '/',
+
   Identifier: 'Identifier', // 标识符
   IntLiteral: 'IntLiteral', // 整型字面量
+  Assignment: '=',
+
   Int: 'Int',
 }
 
