@@ -19,8 +19,9 @@ export const TokenType = {
 
   Int: 'Int',
 
-  LeftParen: '(',
-  RightParen: ')',
+  LeftParen: 'LeftParen', // (
+  RightParen: 'LeftParen', // )
+  SemiColon: 'SemiColon', // ;
 }
 
 // Token 节点

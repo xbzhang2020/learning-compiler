@@ -83,6 +83,9 @@ export class SimpleLexer {
     } else if (c === ')') {
       this.token = new Token(TokenType.RightParen, c)
       state = StateType.RightParen
+    } else if (c === ';') {
+      this.token = new Token(TokenType.SemiColon, c)
+      state = StateType.SemiColon
     }
 
     return state
