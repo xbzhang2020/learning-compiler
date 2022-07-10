@@ -17,9 +17,20 @@ export const ASTNodeType = {
 // AST节点
 export class ASTNode {
   constructor(type, text) {
-    this.parent = null
     this.children = []
     this.type = type
     this.text = text
+  }
+
+  traversal(cb) {
+    this.postOrderTraversal(this, cb)
+  }
+
+  // 后续遍历
+  postOrderTraversal(node, cb = () => null) {
+    if (node) {
+      node.children.forEach((item) => this.postOrderTraversal(item, cb))
+      cb && cb(node)
+    }
   }
 }

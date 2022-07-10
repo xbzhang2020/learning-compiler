@@ -161,9 +161,9 @@ export class SimpleLexer {
   }
 
   // token 序列化
-  tokenize(data) {
+  tokenize(code) {
     let state = StateType.Initial
-    for (const c of data) {
+    for (const c of code) {
       state = this.transformState(state, c)
     }
 
@@ -178,6 +178,46 @@ export class SimpleLexer {
     for (const item of tokens) {
       console.log(item.type, item.text)
     }
+  }
+}
+
+// Token 序列读取器
+export class TokenReader {
+  constructor(tokens = []) {
+    this.tokens = tokens // tokens序列
+    this._pos = 0 // 读取指针的位置
+  }
+
+  peek() {
+    if (this._pos < this.tokens.length) {
+      return this.tokens[this._pos]
+    }
+    return null
+  }
+
+  read() {
+    if (this._pos < this.tokens.length) {
+      return this.tokens[this._pos++]
+    }
+    return null
+  }
+
+  unread() {
+    if (this._pos > 0) {
+      this._pos--
+    }
+  }
+
+  reset() {
+    this._pos = 0
+  }
+
+  getPos() {
+    return this._pos
+  }
+
+  setPos(pos) {
+    this._pos = pos
   }
 }
 
