@@ -86,10 +86,37 @@ export class SimpleCalcuator {
     const lexer = new SimpleLexer()
     this.tokens = new TokenReader(lexer.tokenize(code))
     const res = this.additive(this.tokens)
+
+    // 获取后缀表达式
+    const list = []
     if (res) {
-      res.traversal((node) => console.log(node.text))
+      res.traversal((node) => list.push(node))
     }
-    // console.log(res)
+
+    // 计算值
+    const result = this.calcuate(list)
+    console.log(result)
+  }
+
+  /**
+   * 根据后缀表达式计算
+   */
+  calcuate(list = []) {
+    const stack = []
+    list.forEach((item) => {
+      if (item.type === ASTNodeType.IntLiteral) {
+        stack.push(Number(item.text))
+      } else if (item.type === ASTNodeType.Additive) {
+        const num1 = stack.pop()
+        const num2 = stack.pop()
+        stack.push(num1 + num2)
+      } else if (item.type === ASTNodeType.Multiplicative) {
+        const num1 = stack.pop()
+        const num2 = stack.pop()
+        stack.push(num1 * num2)
+      }
+    })
+    return stack.pop()
   }
 }
 
@@ -98,7 +125,7 @@ export class SimpleCalcuator {
  */
 function test1() {
   const parser = new SimpleCalcuator()
-  parser.parse('2 + 3 * 4')
+  parser.parse('2 * 3 + 5 + 4')
 }
 
 test1()
