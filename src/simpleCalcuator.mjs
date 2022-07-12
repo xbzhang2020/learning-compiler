@@ -18,6 +18,7 @@ export class SimpleCalcuator {
   additive(tokens) {
     let node = this.multiplicative(tokens)
     let token = tokens.peek() // 当前 token
+
     if (node && token && token.type === TokenType.Plus) {
       token = tokens.read()
       const child1 = node
@@ -36,7 +37,7 @@ export class SimpleCalcuator {
   }
 
   /**
-   * 解析乘法表达式
+   * 解析乘法表达式：multiplicative -> primary | primary * multiplicative
    * @param {*} tokens token序列读取器
    * @returns ASTNode
    */
@@ -44,7 +45,9 @@ export class SimpleCalcuator {
     let node = this.primary(tokens)
     let token = tokens.peek() // 当前token
 
-    if (node && token && token.type === TokenType.Star) {
+    if (!node || !token) return node
+
+    if (token.type === TokenType.Star) {
       token = tokens.read()
       const child1 = node
       const child2 = this.multiplicative(tokens)
@@ -62,21 +65,35 @@ export class SimpleCalcuator {
   }
 
   /**
-   * 解析基础表达式
+   * 解析基础表达式：primary -> Num | Identifier | (add)
    * @param {*} tokens token序列读取器
    * @returns ASTNode
    */
   primary(tokens) {
     let node = null
-    let token = tokens.peek()
+    let token = tokens.peek() // 当前 token
 
-    if (token) {
-      if (token.type === TokenType.IntLiteral) {
+    if (!token) return node
+
+    if (token.type === TokenType.IntLiteral) {
+      token = tokens.read()
+      node = new ASTNode(ASTNodeType.IntLiteral, token.text)
+    } else if (token.type === TokenType.Identifier) {
+      token = tokens.read()
+      node = new ASTNode(ASTNodeType.Identifier, token.text)
+    } else if (token.type === TokenType.LeftParen) {
+      tokens.read()
+      node = this.additive(tokens)
+
+      if (!node) {
+        throw new Error('expecting an additive expression inside parenthesis')
+      }
+
+      token = tokens.peek()
+      if (token && token.type === TokenType.RightParen) {
         token = tokens.read()
-        node = new ASTNode(ASTNodeType.IntLiteral, token.text)
-      } else if (token.type === TokenType.Identifier) {
-        token = tokens.read()
-        node = new ASTNode(ASTNodeType.Identifier, token.text)
+      } else {
+        throw new Error('expecting right parenthesis')
       }
     }
     return node
@@ -84,13 +101,17 @@ export class SimpleCalcuator {
 
   parse(code) {
     const lexer = new SimpleLexer()
-    this.tokens = new TokenReader(lexer.tokenize(code))
-    const res = this.additive(this.tokens)
+    const tokens = new TokenReader(lexer.tokenize(code))
+    // console.log('tokens', tokens)
+    const res = this.additive(tokens)
 
     // 获取后缀表达式
     const list = []
     if (res) {
-      res.traversal((node) => list.push(node))
+      res.traversal((node) => {
+        // console.log(node.text)
+        list.push(node)
+      })
     }
 
     // 计算值
@@ -125,7 +146,7 @@ export class SimpleCalcuator {
  */
 function test1() {
   const parser = new SimpleCalcuator()
-  parser.parse('2 * 3 + 5 + 4')
+  parser.parse('2 * (3 + 4)')
 }
 
 test1()

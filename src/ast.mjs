@@ -22,6 +22,10 @@ export class ASTNode {
     this.text = text
   }
 
+  appendChild(node) {
+    this.children.push(node)
+  }
+
   traversal(cb) {
     this.postOrderTraversal(this, cb)
   }
