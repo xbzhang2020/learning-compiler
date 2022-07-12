@@ -26,6 +26,14 @@ export class ASTNode {
     this.children.push(node)
   }
 
+  static dump(node, indent = '') {
+    if (!node) return
+    console.log(indent + node.type + ' ' + node.text)
+    node.children.forEach((item) => {
+      this.dump(item, indent + '\t')
+    })
+  }
+
   traversal(cb) {
     this.postOrderTraversal(this, cb)
   }
