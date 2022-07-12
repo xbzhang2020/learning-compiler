@@ -1,11 +1,11 @@
 /**
- * 简易计算器
+ * 简易解析器
  */
 import { SimpleLexer, TokenReader } from './simpleLexer.mjs'
 import { ASTNode, ASTNodeType } from './ast.mjs'
 import { TokenType } from './token.mjs'
 
-export class SimpleParser {
+export class SimpleCalculator {
   /**
    * 解析变量声明语句： intDeclare -> int Identifier (= Experssion);
    * @param {*} tokens
@@ -190,12 +190,12 @@ export class SimpleParser {
  * 测试代码
  */
 function test1() {
-  const parser = new SimpleParser()
+  const parser = new SimpleCalculator()
   parser.parse('2 + 3 * (4 + 5)')
 }
 
 function test2() {
-  const parser = new SimpleParser()
+  const parser = new SimpleCalculator()
   parser.parse('int age = 18;')
 }
 
