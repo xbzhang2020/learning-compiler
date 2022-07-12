@@ -26,6 +26,10 @@ export class ASTNode {
     this.children.push(node)
   }
 
+  getChildren() {
+    return this.children
+  }
+
   static dump(node, indent = '') {
     if (!node) return
     console.log(indent + node.type + ' ' + node.text)

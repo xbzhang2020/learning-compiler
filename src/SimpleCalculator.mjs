@@ -1,5 +1,5 @@
 /**
- * 简易解析器
+ * 简易计算器
  */
 import { SimpleLexer, TokenReader } from './simpleLexer.mjs'
 import { ASTNode, ASTNodeType } from './ast.mjs'
@@ -13,19 +13,18 @@ export class SimpleCalculator {
   intDeclare(tokens) {
     let node = null
     let token = tokens.peek() // 当前 token
-
     if (!token) return node
-
     if (token.type === TokenType.Int) {
       tokens.read() // 消耗int
       token = tokens.peek()
+
       if (token && token.type === TokenType.Identifier) {
-        token.read() // 消耗标识符
+        tokens.read() // 消耗标识符
         node = new ASTNode(ASTNodeType.IntDeclaration, token.text)
         token = tokens.peek()
         if (token && token.type === TokenType.Assignment) {
           tokens.read() // 消耗赋值符号=
-          const child = this.additive(this.tokens)
+          const child = this.additive(tokens)
           if (child) {
             node.appendChild(child)
           } else {
@@ -152,37 +151,57 @@ export class SimpleCalculator {
     const lexer = new SimpleLexer()
     const tokens = lexer.tokenize(code)
     const ast = this.additive(new TokenReader(tokens))
-    console.log(ast)
-    ASTNode.dump(ast)
-    // const result = this.evaluate(ast)
+    // ASTNode.dump(ast)
     return ast
   }
 
   /**
-   * 根据后缀表达式计算
+   * 计算表达式
+   * @param {*} code
+   * @returns
    */
-  evaluate(res) {
-    if (!res) return
-    const list = []
-    res.traversal((node) => {
-      list.push(node)
-    })
+  evaluate(code) {
+    const ast = this.parse(code)
+    return this.evaluateAST(ast)
+  }
 
-    const stack = []
-    list.forEach((item) => {
-      if (item.type === ASTNodeType.IntLiteral) {
-        stack.push(Number(item.text))
-      } else if (item.type === ASTNodeType.Additive) {
-        const num1 = stack.pop()
-        const num2 = stack.pop()
-        stack.push(num1 + num2)
-      } else if (item.type === ASTNodeType.Multiplicative) {
-        const num1 = stack.pop()
-        const num2 = stack.pop()
-        stack.push(num1 * num2)
-      }
-    })
-    return stack.pop()
+  /**
+   * 计算表达式树
+   * @param {*} ast 表达式树
+   * @returns 计算结果
+   */
+  evaluateAST(ast) {
+    if (!ast) return
+    let result = 0
+
+    switch (ast.type) {
+      case ASTNodeType.IntLiteral:
+        result = Number(ast.text)
+        break
+      case ASTNodeType.Additive:
+        {
+          const value1 = this.evaluateAST(ast.getChildren()[0])
+          const value2 = this.evaluateAST(ast.getChildren()[1])
+          if (ast.text === '-') {
+            result = value1 - value2
+          } else {
+            result = value1 + value2
+          }
+        }
+        break
+      case ASTNodeType.Multiplicative:
+        {
+          const value1 = this.evaluateAST(ast.getChildren()[0])
+          const value2 = this.evaluateAST(ast.getChildren()[1])
+          if (ast.text === '/') {
+            result = value1 / value2
+          } else {
+            result = value1 * value2
+          }
+        }
+        break
+    }
+    return result
   }
 }
 
@@ -191,12 +210,18 @@ export class SimpleCalculator {
  */
 function test1() {
   const parser = new SimpleCalculator()
-  parser.parse('2 + 3 * (4 + 5)')
+  parser.parse('2 - 3 / 3')
 }
 
 function test2() {
   const parser = new SimpleCalculator()
-  parser.parse('int age = 18;')
+  parser.parse('int age = 10 + 18;')
 }
 
-test2()
+function test3() {
+  const parser = new SimpleCalculator()
+  const res = parser.evaluate('2 + 3 * 3')
+  console.log(res)
+}
+
+test3()
