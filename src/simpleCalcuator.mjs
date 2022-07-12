@@ -8,10 +8,51 @@ import { TokenType } from './token.mjs'
 export class SimpleCalcuator {
   constructor() {}
 
-  initDelcareaction(tokens) {}
+  /**
+   * 解析变量声明语句： intDeclare -> int Identifier (= Experssion);
+   * @param {*} tokens
+   */
+  intDeclare(tokens) {
+    let node = null
+    let token = tokens.peek() // 当前 token
+
+    if (!token) return node
+
+    if (token.type === TokenType.Int) {
+      tokens.read() // 消耗int
+      token = tokens.peek()
+      if (token && token.type === TokenType.Identifier) {
+        token.read() // 消耗标识符
+        node = new ASTNode(ASTNodeType.IntDeclaration, token.text)
+        token = tokens.peek()
+        if (token && token.type === TokenType.Assignment) {
+          tokens.read() // 消耗赋值符号=
+          const child = this.additive(this.tokens)
+          if (child) {
+            node.appendChild(child)
+          } else {
+            throw new Error(
+              'invalide variable initialization, expecting an expression'
+            )
+          }
+        }
+      } else {
+        throw new Error('variable name expected')
+      }
+
+      token = tokens.peek()
+      if (token && token.type === TokenType.SemiColon) {
+        tokens.read() // 消耗句尾分号
+      } else {
+        throw new Error('invalid statement, expecting semicolon')
+      }
+    }
+
+    return node
+  }
 
   /**
-   * 解析加法表达式
+   * 解析加法表达式：additive -> multiplicative (+ additive)*
    * @param {*} tokens token序列读取器
    * @returns ASTNode
    */
@@ -19,13 +60,17 @@ export class SimpleCalcuator {
     let node = this.multiplicative(tokens)
     let token = tokens.peek() // 当前 token
 
-    if (node && token && token.type === TokenType.Plus) {
-      token = tokens.read()
+    if (!node || !token) return node
+
+    if (token.type === TokenType.Plus || token.type === TokenType.Minus) {
+      tokens.read()
       const child1 = node
       const child2 = this.additive(tokens)
+
       if (child2) {
         node = new ASTNode(ASTNodeType.Additive, token.text)
-        node.children.push(child1, child2)
+        node.appendChild(child1)
+        node.appendChild(child2)
       } else {
         throw new Error(
           'invalid additive expression, expecting the right part.'
@@ -47,13 +92,15 @@ export class SimpleCalcuator {
 
     if (!node || !token) return node
 
-    if (token.type === TokenType.Star) {
-      token = tokens.read()
+    if (token.type === TokenType.Star || TokenType.Slash) {
+      tokens.read()
       const child1 = node
       const child2 = this.multiplicative(tokens)
+
       if (child2) {
         node = new ASTNode(ASTNodeType.Multiplicative, token.text)
-        node.children.push(child1, child2)
+        node.appendChild(child1)
+        node.appendChild(child2)
       } else {
         throw new Error(
           'invalid multiplicative expression, expecting the right part.'
@@ -76,10 +123,10 @@ export class SimpleCalcuator {
     if (!token) return node
 
     if (token.type === TokenType.IntLiteral) {
-      token = tokens.read()
+      tokens.read()
       node = new ASTNode(ASTNodeType.IntLiteral, token.text)
     } else if (token.type === TokenType.Identifier) {
-      token = tokens.read()
+      tokens.read()
       node = new ASTNode(ASTNodeType.Identifier, token.text)
     } else if (token.type === TokenType.LeftParen) {
       tokens.read()
@@ -91,7 +138,7 @@ export class SimpleCalcuator {
 
       token = tokens.peek()
       if (token && token.type === TokenType.RightParen) {
-        token = tokens.read()
+        tokens.read()
       } else {
         throw new Error('expecting right parenthesis')
       }
@@ -99,24 +146,29 @@ export class SimpleCalcuator {
     return node
   }
 
+  /**
+   * 解析 code
+   * @param {*} code 字符流
+   * @returns AST语法树
+   */
   parse(code) {
     const lexer = new SimpleLexer()
-    const tokens = new TokenReader(lexer.tokenize(code))
-    // console.log('tokens', tokens)
-    const res = this.additive(tokens)
+    const tokens = lexer.tokenize(code)
+    const res = this.additive(new TokenReader(tokens))
 
-    // 获取后缀表达式
-    const list = []
-    if (res) {
-      res.traversal((node) => {
-        // console.log(node.text)
-        list.push(node)
-      })
-    }
+    return res
+    // // 获取后缀表达式
+    // const list = []
+    // if (res) {
+    //   res.traversal((node) => {
+    //     // console.log(node.text)
+    //     list.push(node)
+    //   })
+    // }
 
-    // 计算值
-    const result = this.calcuate(list)
-    console.log(result)
+    // // 计算值
+    // const result = this.calcuate(list)
+    // console.log(result)
   }
 
   /**
@@ -146,7 +198,7 @@ export class SimpleCalcuator {
  */
 function test1() {
   const parser = new SimpleCalcuator()
-  parser.parse('2 * (3 + 4)')
+  parser.parse('2 + 3 * 4 + 5')
 }
 
 test1()
