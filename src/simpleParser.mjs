@@ -7,6 +7,41 @@ import { TokenType } from './token.mjs'
 
 export class SimpleParser {
   /**
+   * 解析 code
+   * @param {*} code 字符流
+   * @returns AST语法树
+   */
+  parse(code) {
+    const lexer = new SimpleLexer()
+    const tokens = lexer.tokenize(code)
+    const ast = this.program(new TokenReader(tokens))
+    ASTNode.dump(ast)
+    return ast
+  }
+
+  /**
+   * 解析语句的根入口
+   * @param {*} tokens
+   * @returns
+   */
+  program(tokens) {
+    const node = new ASTNode(ASTNodeType.Programm, '')
+    while (tokens.peek()) {
+      let child = this.intDeclare(tokens)
+
+      if (!child) {
+        child = this.expressionStatement(tokens)
+      }
+
+      if (child) {
+        node.appendChild(child)
+      } else {
+        throw new Error('unknown statement')
+      }
+    }
+    return node
+  }
+  /**
    * 解析变量声明语句： IntDeclaration -> 'int' Identifier ('=' Expression)?';'
    * @param {*} tokens
    */
@@ -40,8 +75,21 @@ export class SimpleParser {
       if (token && token.type === TokenType.SemiColon) {
         tokens.read() // 消耗句尾分号
       } else {
-        throw new Error('invalid statement, expecting semicolon')
+        throw new Error('invalid declaration statement, expecting semicolon')
       }
+    }
+
+    return node
+  }
+
+  expressionStatement(tokens) {
+    let node = this.additive(tokens)
+    let token = tokens.peek() // 当前 token
+
+    if (node && token && token.type === TokenType.SemiColon) {
+      tokens.read() // 消耗句尾分号
+    } else {
+      throw new Error('invalid expression statement, expecting semicolon')
     }
 
     return node
@@ -193,19 +241,6 @@ export class SimpleParser {
   }
 
   /**
-   * 解析 code
-   * @param {*} code 字符流
-   * @returns AST语法树
-   */
-  parse(code) {
-    const lexer = new SimpleLexer()
-    const tokens = lexer.tokenize(code)
-    const ast = this.additive(new TokenReader(tokens))
-    ASTNode.dump(ast)
-    return ast
-  }
-
-  /**
    * 计算表达式
    * @param {*} code
    * @returns
@@ -260,7 +295,11 @@ export class SimpleParser {
  */
 function test1() {
   const parser = new SimpleParser()
-  parser.parse('2 - 3 / 3')
+  let s1 = '2 + 3 * 3'
+  let s2 = '2 + 3 - 4'
+  let s3 = '2 * 3 / 4'
+  parser.parse(s2)
+  parser.evaluate(s1)
 }
 
 function test2() {
@@ -270,18 +309,10 @@ function test2() {
 
 function test3() {
   const parser = new SimpleParser()
-  const res = parser.evaluate('2 + 3 * 3')
-  console.log(res)
+  let s1 = 'int age = 10 + 18;'
+  let s2 = '10 + 18;'
+  let s3 = s1 + s2
+  parser.parse(s3)
 }
 
-function test4() {
-  const parser = new SimpleParser()
-  parser.parse('2 + 3 - 4')
-}
-
-function test5() {
-  const parser = new SimpleParser()
-  parser.parse('2 * 3 / 4')
-}
-
-test5()
+test3()
