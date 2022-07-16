@@ -33,6 +33,10 @@ export class SimpleParser {
         child = this.expressionStatement(tokens)
       }
 
+      if (!child) {
+        child = this.assignmentStatement(tokens)
+      }
+
       if (child) {
         node.appendChild(child)
       } else {
@@ -41,6 +45,32 @@ export class SimpleParser {
     }
     return node
   }
+
+  /**
+   * 解析表达式语句
+   * @param {*} tokens
+   * @returns
+   */
+  expressionStatement(tokens) {
+    // 表达式语句和赋值语句右相同前缀的情况，可能解析失败，因此需要回溯
+    // age + 10; age = age + 10;
+    let pos = tokens.getPos()
+    let node = this.additive(tokens)
+
+    let token = tokens.peek() // 当前 token
+    if (node && token && token.type === TokenType.SemiColon) {
+      tokens.read() // 消耗句尾分号
+      const child = node
+      node = new ASTNode(ASTNodeType.ExpressionStatement, '')
+      node.appendChild(child)
+    } else {
+      node = null
+      tokens.setPos(pos) // 回溯
+    }
+
+    return node
+  }
+
   /**
    * 解析变量声明语句： IntDeclaration -> 'int' Identifier ('=' Expression)?';'
    * @param {*} tokens
@@ -70,7 +100,9 @@ export class SimpleParser {
       } else {
         throw new Error('variable name expected')
       }
+    }
 
+    if (node) {
       token = tokens.peek()
       if (token && token.type === TokenType.SemiColon) {
         tokens.read() // 消耗句尾分号
@@ -82,14 +114,40 @@ export class SimpleParser {
     return node
   }
 
-  expressionStatement(tokens) {
-    let node = this.additive(tokens)
-    let token = tokens.peek() // 当前 token
+  /**
+   * 解析赋值语句
+   * @param {*} tokens
+   * @returns
+   */
+  assignmentStatement(tokens) {
+    let node = null
+    let token = tokens.peek()
 
-    if (node && token && token.type === TokenType.SemiColon) {
-      tokens.read() // 消耗句尾分号
-    } else {
-      throw new Error('invalid expression statement, expecting semicolon')
+    if (token && token.type === TokenType.Identifier) {
+      tokens.read()
+      node = new ASTNode(ASTNodeType.AssignmentStatement, token.text)
+      token = tokens.peek()
+      if (token && token.type === TokenType.Assignment) {
+        tokens.read() // 消耗赋值符号
+        const child = this.additive(tokens) // 解析表达式
+        if (child) {
+          node.appendChild(child)
+
+          token = tokens.peek()
+          if (token && token.type === TokenType.SemiColon) {
+            tokens.read() // 消耗句尾分号
+          } else {
+            throw new Error('invalid assign statement, expecting semicolon')
+          }
+        } else {
+          throw new Error(
+            'invalide variable initialization, expecting an expression'
+          )
+        }
+      } else {
+        tokens.unread()
+        node = null
+      }
     }
 
     return node
@@ -312,7 +370,9 @@ function test3() {
   let s1 = 'int age = 10 + 18;'
   let s2 = '10 + 18;'
   let s3 = s1 + s2
-  parser.parse(s3)
+  let s4 = 'age = 10 + 18;'
+  let s5 = s3 + s4
+  parser.parse(s5)
 }
 
 test3()
