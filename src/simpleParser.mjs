@@ -87,7 +87,7 @@ export class SimpleParser {
       tokens.read()
       const child2 = this.multiplicative(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Additive, token.text)
+        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
         child1 = node
@@ -111,22 +111,45 @@ export class SimpleParser {
     let node = this.primary(tokens)
     let token = tokens.peek() // 当前token
 
-    if (
-      node &&
+    // 递归算法，不保证结合性
+    // if (
+    //   node &&
+    //   token &&
+    //   (token.type === TokenType.Star || token.type === TokenType.Slash)
+    // ) {
+    //   tokens.read()
+    //   const child1 = node
+    //   const child2 = this.multiplicative(tokens)
+
+    //   if (child2) {
+    //     node = new ASTNode(ASTNodeType.Multiplicative, token.text)
+    //     node.appendChild(child1)
+    //     node.appendChild(child2)
+    //   } else {
+    //     throw new Error(
+    //       'invalid multiplicative expression, expecting the right part.'
+    //     )
+    //   }
+    // }
+
+    // 循环算法，保证了结合性
+    let child1 = node
+    while (
+      child1 &&
       token &&
       (token.type === TokenType.Star || token.type === TokenType.Slash)
     ) {
       tokens.read()
-      const child1 = node
-      const child2 = this.multiplicative(tokens)
-
+      const child2 = this.primary(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
+        node = new ASTNode(ASTNodeType.Additive, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
+        child1 = node
+        token = tokens.peek()
       } else {
         throw new Error(
-          'invalid multiplicative expression, expecting the right part.'
+          'invalid additive expression, expecting the right part.'
         )
       }
     }
@@ -253,12 +276,12 @@ function test3() {
 
 function test4() {
   const parser = new SimpleParser()
-  parser.parse('2 + 3 + 4')
+  parser.parse('2 + 3 - 4')
 }
 
 function test5() {
   const parser = new SimpleParser()
-  parser.parse('2 * 3 * 4')
+  parser.parse('2 * 3 / 4')
 }
 
 test5()
