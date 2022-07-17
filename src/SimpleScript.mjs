@@ -17,15 +17,22 @@ async function repl() {
   })
 
   const parser = new SimpleParser()
-  function evaluate(line) {
+
+  function handle(line) {
+    // 执行
     const res = parser.evaluate(line)
-    console.log(res)
+    // 打印
+    if (Array.isArray(res)) {
+      res.forEach((item) => console.log(item))
+    } else {
+      console.log(res)
+    }
   }
 
   rl.prompt()
 
   rl.on('line', (line) => {
-    evaluate(line)
+    handle(line)
     rl.prompt()
   }).on('close', () => {
     console.log('Bye!')
@@ -223,7 +230,7 @@ export class SimpleParser {
       tokens.read()
       const child2 = this.multiplicative(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
+        node = new ASTNode(ASTNodeType.Additive, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
         child1 = node
@@ -257,7 +264,7 @@ export class SimpleParser {
       tokens.read()
       const child2 = this.primary(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Additive, token.text)
+        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
         child1 = node
@@ -335,6 +342,7 @@ export class SimpleParser {
         })
         break
       case ASTNodeType.ExpressionStatement:
+        // console.log('res', ast.getChildren()[0])
         result = this.evaluateAST(ast.getChildren()[0])
         break
       case ASTNodeType.IntLiteral:

@@ -193,7 +193,7 @@ export class SimpleParser {
       tokens.read()
       const child2 = this.multiplicative(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
+        node = new ASTNode(ASTNodeType.Additive, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
         child1 = node
@@ -248,7 +248,7 @@ export class SimpleParser {
       tokens.read()
       const child2 = this.primary(tokens)
       if (child2) {
-        node = new ASTNode(ASTNodeType.Additive, token.text)
+        node = new ASTNode(ASTNodeType.Multiplicative, token.text)
         node.appendChild(child1)
         node.appendChild(child2)
         child1 = node
