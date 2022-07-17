@@ -20,14 +20,17 @@ async function repl() {
 
   function handle(line) {
     // 执行
-    const res = parser.evaluate(line)
-    // 打印
-    if (Array.isArray(res)) {
-      res.forEach((item) => console.log(item))
-    } else {
-      console.log(res)
+    try {
+      const res = parser.evaluate(line)
+      // 打印
+      if (Array.isArray(res)) {
+        res.forEach((item) => console.log(item))
+      } else {
+        console.log(res)
+      }
+    } catch (e) {
+      console.log('Error: ' + e.message)
     }
-    console.log(parser.variables)
   }
 
   rl.prompt()
@@ -59,7 +62,7 @@ export class SimpleParser {
     const lexer = new SimpleLexer()
     const tokens = lexer.tokenize(code)
     const ast = this.program(new TokenReader(tokens))
-    ASTNode.dump(ast)
+    // ASTNode.dump(ast)
     return ast
   }
 
@@ -351,6 +354,16 @@ export class SimpleParser {
         break
       case ASTNodeType.IntLiteral:
         result = Number(ast.text)
+        break
+      case ASTNodeType.Identifier:
+        {
+          const key = ast.text
+          if (this.variables.has(key)) {
+            result = this.variables.get(key)
+          } else {
+            throw Error('unknown variable: ' + key)
+          }
+        }
         break
       case ASTNodeType.Additive:
         {
