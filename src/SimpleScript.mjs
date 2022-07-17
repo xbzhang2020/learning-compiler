@@ -27,6 +27,7 @@ async function repl() {
     } else {
       console.log(res)
     }
+    console.log(parser.variables)
   }
 
   rl.prompt()
@@ -41,27 +42,12 @@ async function repl() {
 }
 repl()
 
-export class VariableMap {
-  constructor() {
-    this.variables = new Map() // 变量存储区
-  }
-
-  get(key) {
-    if (key in this.variables) {
-      return this.variables[key]
-    } else {
-      throw Error('unknown variable: ' + key)
-    }
-  }
-
-  set(key, value) {
-    this.variables[key] = value
-  }
-}
-
+/**
+ * 简易解析器
+ */
 export class SimpleParser {
   constructor() {
-    this.variables = new VariableMap()
+    this.variables = new Map()
   }
 
   /**
@@ -73,7 +59,7 @@ export class SimpleParser {
     const lexer = new SimpleLexer()
     const tokens = lexer.tokenize(code)
     const ast = this.program(new TokenReader(tokens))
-    // ASTNode.dump(ast)
+    ASTNode.dump(ast)
     return ast
   }
 
@@ -164,6 +150,7 @@ export class SimpleParser {
       token = tokens.peek()
       if (token && token.type === TokenType.SemiColon) {
         tokens.read() // 消耗句尾分号
+        // this.variables.set()
       } else {
         throw new Error('invalid declaration statement, expecting semicolon')
       }
@@ -331,7 +318,7 @@ export class SimpleParser {
    */
   evaluateAST(ast) {
     if (!ast) return
-    let result = null
+    let result = undefined
 
     switch (ast.type) {
       case ASTNodeType.Programm:
@@ -342,8 +329,25 @@ export class SimpleParser {
         })
         break
       case ASTNodeType.ExpressionStatement:
-        // console.log('res', ast.getChildren()[0])
         result = this.evaluateAST(ast.getChildren()[0])
+        break
+      case ASTNodeType.IntDeclaration:
+        {
+          const key = ast.text
+          const value = this.evaluateAST(ast.getChildren()[0])
+          this.variables.set(key, value)
+        }
+        break
+      case ASTNodeType.AssignmentStatement:
+        {
+          const key = ast.text
+          if (this.variables.has(key)) {
+            const value = this.evaluateAST(ast.getChildren()[0])
+            this.variables.set(key, value)
+          } else {
+            throw Error('unknown variable: ' + key)
+          }
+        }
         break
       case ASTNodeType.IntLiteral:
         result = Number(ast.text)
