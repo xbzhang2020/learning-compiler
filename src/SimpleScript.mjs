@@ -16,10 +16,16 @@ async function repl() {
     prompt: '> ',
   })
 
+  const parser = new SimpleParser()
+  function evaluate(line) {
+    const res = parser.evaluate(line)
+    console.log(res)
+  }
+
   rl.prompt()
 
   rl.on('line', (line) => {
-    console.log(`echo: ${line}`)
+    evaluate(line)
     rl.prompt()
   }).on('close', () => {
     console.log('Bye!')
@@ -60,7 +66,7 @@ export class SimpleParser {
     const lexer = new SimpleLexer()
     const tokens = lexer.tokenize(code)
     const ast = this.program(new TokenReader(tokens))
-    ASTNode.dump(ast)
+    // ASTNode.dump(ast)
     return ast
   }
 
@@ -312,15 +318,25 @@ export class SimpleParser {
   }
 
   /**
-   * 计算表达式树
-   * @param {*} ast 表达式树
+   * 执行语法树
+   * @param {*} ast 语法树
    * @returns 计算结果
    */
   evaluateAST(ast) {
     if (!ast) return
-    let result = 0
+    let result = null
 
     switch (ast.type) {
+      case ASTNodeType.Programm:
+        result = []
+        ast.getChildren().forEach((item) => {
+          const value = this.evaluateAST(item)
+          result.push(value)
+        })
+        break
+      case ASTNodeType.ExpressionStatement:
+        result = this.evaluateAST(ast.getChildren()[0])
+        break
       case ASTNodeType.IntLiteral:
         result = Number(ast.text)
         break
