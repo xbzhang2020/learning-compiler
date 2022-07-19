@@ -1,9 +1,9 @@
 /**
  * 简易计算器
  */
-import { SimpleLexer, TokenReader } from './simpleLexer.mjs'
-import { ASTNode, ASTNodeType } from './ast.mjs'
-import { TokenType } from './token.mjs'
+import { SimpleLexer, TokenReader } from './simpleLexer.js'
+import { ASTNode, ASTNodeType } from './ast.js'
+import { TokenType } from './token.js'
 
 export class SimpleCalculator {
   /**

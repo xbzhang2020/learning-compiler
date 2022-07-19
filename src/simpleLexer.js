@@ -1,7 +1,7 @@
 /**
  * 简易词法分析器
  */
-import { Token, TokenType } from './token.mjs'
+import { Token, TokenType } from './token.js'
 
 // 有限自动机的状态集合
 const StateType = {

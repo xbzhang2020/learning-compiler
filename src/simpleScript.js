@@ -1,11 +1,58 @@
 /**
+ * 简易脚本语言
+ */
+import { SimpleLexer, TokenReader } from './simpleLexer.js'
+import { ASTNode, ASTNodeType } from './ast.js'
+import { TokenType } from './token.js'
+
+/**
+ * REPL
+ */
+async function repl() {
+  const readline = await import('readline')
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: '> ',
+  })
+
+  const parser = new SimpleParser()
+
+  function handle(line) {
+    // 执行
+    try {
+      const res = parser.evaluate(line)
+      // 打印
+      if (Array.isArray(res)) {
+        res.forEach((item) => console.log(item))
+      } else {
+        console.log(res)
+      }
+    } catch (e) {
+      console.log('Error: ' + e.message)
+    }
+  }
+
+  rl.prompt()
+
+  rl.on('line', (line) => {
+    handle(line)
+    rl.prompt()
+  }).on('close', () => {
+    console.log('Bye!')
+    process.exit(0)
+  })
+}
+repl()
+
+/**
  * 简易解析器
  */
-import { SimpleLexer, TokenReader } from './simpleLexer.mjs'
-import { ASTNode, ASTNodeType } from './ast.mjs'
-import { TokenType } from './token.mjs'
-
 export class SimpleParser {
+  constructor() {
+    this.variables = new Map()
+  }
+
   /**
    * 解析 code
    * @param {*} code 字符流
@@ -15,7 +62,7 @@ export class SimpleParser {
     const lexer = new SimpleLexer()
     const tokens = lexer.tokenize(code)
     const ast = this.program(new TokenReader(tokens))
-    ASTNode.dump(ast)
+    // ASTNode.dump(ast)
     return ast
   }
 
@@ -106,6 +153,7 @@ export class SimpleParser {
       token = tokens.peek()
       if (token && token.type === TokenType.SemiColon) {
         tokens.read() // 消耗句尾分号
+        // this.variables.set()
       } else {
         throw new Error('invalid declaration statement, expecting semicolon')
       }
@@ -162,27 +210,6 @@ export class SimpleParser {
     let node = this.multiplicative(tokens)
     let token = tokens.peek() // 当前 token
 
-    // 递归算法，不保证结合性
-    // if (
-    //   node &&
-    //   token &&
-    //   (token.type === TokenType.Plus || token.type === TokenType.Minus)
-    // ) {
-    //   tokens.read()
-    //   const child1 = node
-    //   const child2 = this.additive(tokens)
-
-    //   if (child2) {
-    //     node = new ASTNode(ASTNodeType.Additive, token.text)
-    //     node.appendChild(child1)
-    //     node.appendChild(child2)
-    //   } else {
-    //     throw new Error(
-    //       'invalid additive expression, expecting the right part.'
-    //     )
-    //   }
-    // }
-
     // 循环算法，保证了结合性
     let child1 = node
     while (
@@ -216,27 +243,6 @@ export class SimpleParser {
   multiplicative(tokens) {
     let node = this.primary(tokens)
     let token = tokens.peek() // 当前token
-
-    // 递归算法，不保证结合性
-    // if (
-    //   node &&
-    //   token &&
-    //   (token.type === TokenType.Star || token.type === TokenType.Slash)
-    // ) {
-    //   tokens.read()
-    //   const child1 = node
-    //   const child2 = this.multiplicative(tokens)
-
-    //   if (child2) {
-    //     node = new ASTNode(ASTNodeType.Multiplicative, token.text)
-    //     node.appendChild(child1)
-    //     node.appendChild(child2)
-    //   } else {
-    //     throw new Error(
-    //       'invalid multiplicative expression, expecting the right part.'
-    //     )
-    //   }
-    // }
 
     // 循环算法，保证了结合性
     let child1 = node
@@ -309,17 +315,55 @@ export class SimpleParser {
   }
 
   /**
-   * 计算表达式树
-   * @param {*} ast 表达式树
+   * 执行语法树
+   * @param {*} ast 语法树
    * @returns 计算结果
    */
   evaluateAST(ast) {
     if (!ast) return
-    let result = 0
+    let result = undefined
 
     switch (ast.type) {
+      case ASTNodeType.Programm:
+        result = []
+        ast.getChildren().forEach((item) => {
+          const value = this.evaluateAST(item)
+          result.push(value)
+        })
+        break
+      case ASTNodeType.ExpressionStatement:
+        result = this.evaluateAST(ast.getChildren()[0])
+        break
+      case ASTNodeType.IntDeclaration:
+        {
+          const key = ast.text
+          const value = this.evaluateAST(ast.getChildren()[0])
+          this.variables.set(key, value)
+        }
+        break
+      case ASTNodeType.AssignmentStatement:
+        {
+          const key = ast.text
+          if (this.variables.has(key)) {
+            const value = this.evaluateAST(ast.getChildren()[0])
+            this.variables.set(key, value)
+          } else {
+            throw Error('unknown variable: ' + key)
+          }
+        }
+        break
       case ASTNodeType.IntLiteral:
         result = Number(ast.text)
+        break
+      case ASTNodeType.Identifier:
+        {
+          const key = ast.text
+          if (this.variables.has(key)) {
+            result = this.variables.get(key)
+          } else {
+            throw Error('unknown variable: ' + key)
+          }
+        }
         break
       case ASTNodeType.Additive:
         {
@@ -347,32 +391,3 @@ export class SimpleParser {
     return result
   }
 }
-
-/**
- * 测试代码
- */
-function test1() {
-  const parser = new SimpleParser()
-  let s1 = '2 + 3 * 3'
-  let s2 = '2 + 3 - 4'
-  let s3 = '2 * 3 / 4'
-  parser.parse(s2)
-  parser.evaluate(s1)
-}
-
-function test2() {
-  const parser = new SimpleParser()
-  parser.parse('int age = 10 + 18;')
-}
-
-function test3() {
-  const parser = new SimpleParser()
-  let s1 = 'int age = 10 + 18;'
-  let s2 = '10 + 18;'
-  let s3 = s1 + s2
-  let s4 = 'age = 10 + 18;'
-  let s5 = s3 + s4
-  parser.parse(s5)
-}
-
-test3()
