@@ -8,5 +8,8 @@ export default class HelloListener extends antlr4.tree.ParseTreeListener {
   enterR(ctx) {}
 
   // Exit a parse tree produced by HelloParser#r.
-  exitR(ctx) {}
+  exitR(ctx) {
+    const key = ctx.getChild(0)
+    console.log(key)
+  }
 }
