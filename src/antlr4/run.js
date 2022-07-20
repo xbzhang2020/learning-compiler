@@ -1,7 +1,7 @@
 import antlr4 from 'antlr4'
 import MyGrammarLexer from './HelloLexer.js'
 import MyGrammarParser from './HelloParser.js'
-// import MyGrammarListener from './HelloListener.js'
+import MyGrammarListener from './HelloListener.js'
 
 const input = 'hello world'
 const chars = new antlr4.InputStream(input)
@@ -11,3 +11,7 @@ const parser = new MyGrammarParser(tokens)
 parser.buildParseTrees = true
 
 const tree = parser.r()
+
+// 监听器
+const listener = new MyGrammarListener()
+antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree)

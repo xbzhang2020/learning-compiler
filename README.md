@@ -2,6 +2,11 @@
 
 学习编译原理
 
+### 运行 antlr
+
+```
+antlr4 -Dlanguage=JavaScript  Hello.g4
+```
 
 ## 注意
 
