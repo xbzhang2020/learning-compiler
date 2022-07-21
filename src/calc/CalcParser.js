@@ -134,7 +134,7 @@ export default class CalcParser extends antlr4.Parser {
       var la_ = this._interp.adaptivePredict(this._input, 1, this._ctx)
       switch (la_) {
         case 1:
-          localctx = new ExprStatContext(this, localctx)
+          localctx = new AssignStatContext(this, localctx)
           this.enterOuterAlt(localctx, 1)
           this.state = 11
           this.match(CalcParser.ID)
@@ -147,7 +147,7 @@ export default class CalcParser extends antlr4.Parser {
           break
 
         case 2:
-          localctx = new AssignStatContext(this, localctx)
+          localctx = new ExprStatContext(this, localctx)
           this.enterOuterAlt(localctx, 2)
           this.state = 16
           this.expr(0)
@@ -253,9 +253,10 @@ export default class CalcParser extends antlr4.Parser {
                 )
               }
               this.state = 32
+              localctx.op = this._input.LT(1)
               _la = this._input.LA(1)
               if (!(_la === CalcParser.T__1 || _la === CalcParser.T__2)) {
-                this._errHandler.recoverInline(this)
+                localctx.op = this._errHandler.recoverInline(this)
               } else {
                 this._errHandler.reportMatch(this)
                 this.consume()
@@ -282,9 +283,10 @@ export default class CalcParser extends antlr4.Parser {
                 )
               }
               this.state = 35
+              localctx.op = this._input.LT(1)
               _la = this._input.LA(1)
               if (!(_la === CalcParser.T__3 || _la === CalcParser.T__4)) {
-                this._errHandler.recoverInline(this)
+                localctx.op = this._errHandler.recoverInline(this)
               } else {
                 this._errHandler.reportMatch(this)
                 this.consume()
@@ -408,10 +410,6 @@ class ExprStatContext extends StatContext {
     super.copyFrom(ctx)
   }
 
-  ID() {
-    return this.getToken(CalcParser.ID, 0)
-  }
-
   expr() {
     return this.getTypedRuleContext(ExprContext, 0)
   }
@@ -435,6 +433,10 @@ class AssignStatContext extends StatContext {
   constructor(parser, ctx) {
     super(parser)
     super.copyFrom(ctx)
+  }
+
+  ID() {
+    return this.getToken(CalcParser.ID, 0)
   }
 
   expr() {
@@ -477,6 +479,7 @@ class ExprContext extends antlr4.ParserRuleContext {
 class AddContext extends ExprContext {
   constructor(parser, ctx) {
     super(parser)
+    this.op = null // Token;
     super.copyFrom(ctx)
   }
 
@@ -526,6 +529,7 @@ CalcParser.ParensContext = ParensContext
 class MulContext extends ExprContext {
   constructor(parser, ctx) {
     super(parser)
+    this.op = null // Token;
     super.copyFrom(ctx)
   }
 

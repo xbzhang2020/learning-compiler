@@ -5,6 +5,11 @@ import antlr4 from 'antlr4'
 // This class defines a complete generic visitor for a parse tree produced by CalcParser.
 
 export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
+  constructor() {
+    super()
+    this.variables = new Map()
+  }
+
   visitChildren(ctx) {
     if (!ctx) return
 
@@ -21,17 +26,23 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
 
   // Visit a parse tree produced by CalcParser#prog.
   visitProg(ctx) {
-    return this.visitChildren(ctx)
-  }
-
-  // Visit a parse tree produced by CalcParser#assignStat.
-  visitAssignStat(ctx) {
-    return this.visitChildren(ctx)
+    const res = this.visitChildren(ctx)
+    console.log('res', res)
+    return res
   }
 
   // Visit a parse tree produced by CalcParser#exprStat.
   visitExprStat(ctx) {
-    return this.visitChildren(ctx)
+    const res = this.visitChildren(ctx)
+    // console.log(res)
+    return res
+  }
+
+  // Visit a parse tree produced by CalcParser#assignStat.
+  visitAssignStat(ctx) {
+    const res = this.visitChildren(ctx)
+    console.log(res)
+    return res
   }
 
   // Visit a parse tree produced by CalcParser#blank.
@@ -41,7 +52,9 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
 
   // Visit a parse tree produced by CalcParser#add.
   visitAdd(ctx) {
-    return this.visitChildren(ctx)
+    const [left, op, right] = this.visitChildren(ctx)
+    if (op === '+') return left + right
+    return left - right
   }
 
   // Visit a parse tree produced by CalcParser#parens.
@@ -51,7 +64,9 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
 
   // Visit a parse tree produced by CalcParser#mul.
   visitMul(ctx) {
-    return this.visitChildren(ctx)
+    const [left, op, right] = this.visitChildren(ctx)
+    if (op === '*') return left * right
+    return left / right
   }
 
   // Visit a parse tree produced by CalcParser#id.

@@ -3,13 +3,13 @@ grammar Calc;
 // 语法规则
 prog: stat+;
 stat:
-	ID '=' expr NEWLINE	# exprStat
-	| expr NEWLINE		# assignStat
+	ID '=' expr NEWLINE	# assignStat
+	| expr NEWLINE		# exprStat
 	| NEWLINE			# blank;
 
 expr:
-	expr ('*' | '/') expr	# mul
-	| expr ('+' | '-') expr	# add
+	expr op=('*' | '/') expr	# mul
+	| expr op=('+' | '-') expr	# add
 	| INT					# int
 	| ID					# id
 	| '(' expr ')'			# parens;

@@ -4,8 +4,7 @@ import MyGrammarParser from './CalcParser.js'
 import MyGrammarVisitor from './CalcVisitor.js'
 
 const input = `
-a = 2
-b = a + 2 * 3
+2 + 3 * 4 
 `
 const chars = new antlr4.InputStream(input)
 const lexer = new MyGrammarLexer(chars)
@@ -15,4 +14,3 @@ parser.buildParseTrees = true
 
 const tree = parser.prog()
 tree.accept(new MyGrammarVisitor())
-console.log(tree.toStringTree())
