@@ -4,7 +4,7 @@ import MyGrammarParser from './CalcParser.js'
 import MyGrammarVisitor from './CalcVisitor.js'
 
 const input = `
-2 + 3 * 4 
+2 + 3 * 4 + (5 + 6)
 `
 const chars = new antlr4.InputStream(input)
 const lexer = new MyGrammarLexer(chars)
