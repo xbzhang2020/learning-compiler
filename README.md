@@ -6,6 +6,7 @@
 
 ```
 antlr4 -Dlanguage=JavaScript  Hello.g4
+antlr4 Calc.g4 -Dlanguage=JavaScript -no-listener -visitor
 ```
 
 ## 注意

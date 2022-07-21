@@ -4,3 +4,6 @@ temp
 
 #antlr temp files
 .antlr/
+
+*.class
+*.java
