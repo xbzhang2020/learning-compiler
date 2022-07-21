@@ -2,7 +2,7 @@ node_modules
 dist
 temp
 
-#antlr temp files
+# antlr temp files
 .antlr/
 
 *.class

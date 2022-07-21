@@ -2,9 +2,13 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: {
     index: './src/index.js',
+  },
+  output: {
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'docs'),
   },
   module: {
     rules: [
@@ -22,11 +26,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: '编译原理',
+      title: 'learning-compiler',
     }),
   ],
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
 }
