@@ -2,9 +2,22 @@
 // jshint ignore: start
 import antlr4 from 'antlr4'
 
-// This class defines a complete generic visitor for a parse tree produced by CalcParser.
+// 打印计算结果
+function print(res) {
+  if (Array.isArray(res)) {
+    res.forEach((item) => console.log(item))
+  } else {
+    console.log(res)
+  }
+}
 
+// This class defines a complete generic visitor for a parse tree produced by CalcParser.
 export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
+  constructor() {
+    super()
+    this.variables = new Map() // 变量存储区
+  }
+
   visitChildren(ctx) {
     if (!ctx) return
 
@@ -22,13 +35,15 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
   // Visit a parse tree produced by CalcParser#prog.
   visitProg(ctx) {
     const res = this.visitChildren(ctx)
-    console.log(res)
+    print(res)
     return res
   }
 
   // Visit a parse tree produced by CalcParser#assignStat.
   visitAssignStat(ctx) {
-    return this.visitChildren(ctx)
+    const [key, op, value] = this.visitChildren(ctx)
+    this.variables.set(key, value)
+    return value
   }
 
   // Visit a parse tree produced by CalcParser#exprStat.
@@ -64,7 +79,12 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
 
   // Visit a parse tree produced by CalcParser#id.
   visitId(ctx) {
-    return this.visitChildren(ctx)
+    const key = ctx.getText()
+    if (this.variables.has(key)) {
+      return this.variables.get(key)
+    } else {
+      throw new Error(`unknown variable: ${key}`)
+    }
   }
 
   // Visit a parse tree produced by CalcParser#int.
