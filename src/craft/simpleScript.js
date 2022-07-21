@@ -4,46 +4,7 @@
 import { SimpleLexer, TokenReader } from './simpleLexer.js'
 import { ASTNode, ASTNodeType } from './ast.js'
 import { TokenType } from './token.js'
-
-/**
- * REPL
- */
-async function repl() {
-  const readline = await import('readline')
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: '> ',
-  })
-
-  const parser = new SimpleParser()
-
-  function handle(line) {
-    // 执行
-    try {
-      const res = parser.evaluate(line)
-      // 打印
-      if (Array.isArray(res)) {
-        res.forEach((item) => console.log(item))
-      } else {
-        console.log(res)
-      }
-    } catch (e) {
-      console.log('Error: ' + e.message)
-    }
-  }
-
-  rl.prompt()
-
-  rl.on('line', (line) => {
-    handle(line)
-    rl.prompt()
-  }).on('close', () => {
-    console.log('Bye!')
-    process.exit(0)
-  })
-}
-repl()
+import repl, { print } from './repl.js'
 
 /**
  * 简易解析器
@@ -391,3 +352,9 @@ export class SimpleParser {
     return result
   }
 }
+
+function main() {
+  const parser = new SimpleParser()
+  repl((line) => parser.evaluate(line), print)
+}
+main()
