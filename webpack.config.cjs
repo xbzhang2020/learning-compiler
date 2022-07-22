@@ -26,7 +26,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'learning-compiler',
+      template: './src/index.html',
     }),
   ],
 }
