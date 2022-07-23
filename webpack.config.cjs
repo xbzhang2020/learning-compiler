@@ -1,7 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const BundleAnalyzerPlugin =
-  require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 // const fs = require('fs')
 
 // 获取多页面路径
@@ -66,9 +66,9 @@ module.exports = {
       template: './src/index.html',
     }),
     ...getPagesHtmlWebpackPluginInfo(pagePaths),
-    new BundleAnalyzerPlugin({
-      analyzerMode: 'static',
-    }),
+    // new BundleAnalyzerPlugin({
+    //   analyzerMode: 'static',
+    // }),
   ],
   optimization: {
     splitChunks: {
