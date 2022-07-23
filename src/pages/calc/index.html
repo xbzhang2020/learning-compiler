@@ -6,15 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>计算器程序</title>
   </head>
+  <style>
+    textarea {
+      resize: none;
+    }
+    .message {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
   <body>
     <div>
       <h2>简易计算器</h2>
-      <div>
-        <button>运行</button>
+      <p class="message">说明：支持加减乘除基本运算、括号运算及变量赋值语句，每条语句以换行结束。</p>
+      <div style="margin-bottom: 10px">
+        <button id="run-btn">运行</button>
       </div>
       <div>
-        <textarea name="input" id="input" cols="30" rows="10"></textarea>
-        <textarea name="output" id="output" cols="30" rows="10"></textarea>
+        <textarea
+          name="input"
+          id="input"
+          cols="30"
+          rows="10"
+          placeholder="输入"
+        >
+a=2
+b=a*(3+5)
+</textarea
+        >
+
+        <textarea
+          name="output"
+          id="output"
+          cols="30"
+          rows="10"
+          disabled
+        ></textarea>
       </div>
     </div>
   </body>

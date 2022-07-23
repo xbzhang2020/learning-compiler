@@ -35,7 +35,7 @@ export default class CalcVisitor extends antlr4.tree.ParseTreeVisitor {
   // Visit a parse tree produced by CalcParser#prog.
   visitProg(ctx) {
     const res = this.visitChildren(ctx)
-    print(res)
+    // print(res)
     return res
   }
 
