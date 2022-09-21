@@ -1,0 +1,91 @@
+import Lexer from './lexer.js'
+import { TokenType } from './token.js'
+import { Node, NodeType } from './ast.js'
+
+export class TokensReader {
+  constructor(tokens) {
+    this.tokens = tokens
+    this.pos = 0
+  }
+
+  read() {
+    if (this.pos >= this.tokens.length) return null
+    const res = this.tokens[this.pos]
+    this.pos++
+    return res
+  }
+
+  peek() {
+    if (this.pos >= this.tokens.length) return null
+    return this.tokens[this.pos]
+  }
+}
+
+class Parser {
+  constructor(input) {
+    this.input = input
+  }
+
+  parse() {
+    const lexer = new Lexer(this.input)
+    const tokens = lexer.tokenize()
+    const tokensReader = new TokensReader(tokens)
+    const res = this.parseprogram(tokensReader)
+    return res
+  }
+
+  parseprogram(tokens) {
+    const node = new Node(NodeType.Program, null)
+    while (tokens.peek() !== null) {
+      let child = null
+
+      switch (tokens.peek().type) {
+        case TokenType.LET:
+          child = this.parseLetStatement(tokens)
+          break
+        default:
+          tokens.read()
+      }
+
+      if (child) {
+        node.children.push(child)
+      }
+    }
+    return node
+  }
+
+  parseLetStatement(tokens) {
+    // 消耗 let 关键词
+    tokens.read()
+    let node = null
+    let next = tokens.peek()
+
+    if (next && next.type === TokenType.IDENTIFIER) {
+      // 消耗标识符
+      tokens.read()
+      node = new Node(NodeType.LetStatement, next.text)
+      next = tokens.peek()
+      if (next && next.type === TokenType.ASSIGNMENT) {
+        // 消耗 =
+        tokens.read()
+        next = tokens.peek()
+        if (next) {
+          // 解析表达式
+        } else {
+          throw new Error(
+            'invalide variable initialization, expecting an expression'
+          )
+        }
+      }
+    } else {
+      throw new Error('variable name expected')
+    }
+    return node
+  }
+
+  parseExpressionStatement(tokens) {}
+
+  parseExpression(tokens) {}
+}
+
+export default Parser
