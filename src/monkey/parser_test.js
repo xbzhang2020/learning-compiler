@@ -2,7 +2,8 @@ import Parser from './parser.js'
 import Lexer from './lexer.js'
 
 function test1() {
-  let input = 'let age = 18;'
+  let input = '1 + 1;'
+  // let input = 'let age = 18;'
   // let input = 'let age1 = 24;'
   //   let input = `
   //   let age = 20;
@@ -11,7 +12,9 @@ function test1() {
   //   } else {
   //     return false
   //   }`
-  const parser = new Parser(input)
+  const lexer = new Lexer(input)
+  const tokens = lexer.tokenize()
+  const parser = new Parser(tokens)
   const res = parser.parse()
   console.log(res)
 }

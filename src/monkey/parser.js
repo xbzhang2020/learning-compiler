@@ -1,4 +1,3 @@
-import Lexer from './lexer.js'
 import { TokenType } from './token.js'
 import { Node, NodeType } from './ast.js'
 
@@ -22,34 +21,34 @@ export class TokensReader {
 }
 
 class Parser {
-  constructor(input) {
-    this.input = input
+  constructor(tokens) {
+    this.tokens = tokens
+    this.tokensReader = new TokensReader(tokens)
   }
 
   parse() {
-    const lexer = new Lexer(this.input)
-    const tokens = lexer.tokenize()
-    const tokensReader = new TokensReader(tokens)
-    const res = this.parseprogram(tokensReader)
+    const res = this.parseProgram()
     return res
   }
 
-  parseprogram(tokens) {
+  parseProgram() {
     const node = new Node(NodeType.Program, null)
-    while (tokens.peek() !== null) {
+    while (this.tokensReader.peek() !== null) {
       let child = null
 
-      switch (tokens.peek().type) {
-        case TokenType.LET:
-          child = this.parseLetStatement(tokens)
-          break
+      switch (this.tokensReader.peek().type) {
+        // case TokenType.LET:
+        //   child = this.parseLetStatement()
+        //   break
         default:
-          tokens.read()
+          child = this.parseExpressionStatement()
       }
 
       if (child) {
         node.children.push(child)
       }
+
+      this.tokensReader.read()
     }
     return node
   }
@@ -83,9 +82,36 @@ class Parser {
     return node
   }
 
-  parseExpressionStatement(tokens) {}
+  parseExpressionStatement() {
+    const res = this.parseExpression()
+    // console.log('expression', res)
+    return res
+  }
 
-  parseExpression(tokens) {}
+  parseExpression() {
+    // 解析左节点
+    let leftNode = null
+    const next = this.tokensReader.peek()
+    if (next && next.type === TokenType.INT) {
+      leftNode = this.parseIntLiteral(next)
+    } else if (next && next.type === TokenType.IDENTIFIER) {
+      leftNode = this.parerIndentifier(next)
+    }
+
+    if (!leftNode) return
+
+    return leftNode
+  }
+
+  parseIntLiteral(token) {
+    const node = new Node(NodeType.IntLiteral, token.text)
+    return node
+  }
+
+  parerIndentifier(token) {
+    const node = new Node(NodeType.Identifier, token.text)
+    return node
+  }
 }
 
 export default Parser

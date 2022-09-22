@@ -47,16 +47,16 @@ class Lexer {
 
     switch (c) {
       case '+':
-        c = new Token(TokenType.PLUS, c)
+        token = new Token(TokenType.PLUS, c)
         break
       case '-':
-        c = new Token(TokenType.MINUS, c)
+        token = new Token(TokenType.MINUS, c)
         break
       case '*':
-        c = new Token(TokenType.ASSIGNMENT, c)
+        token = new Token(TokenType.ASSIGNMENT, c)
         break
       case '/':
-        c = new Token(TokenType.SLASH, c)
+        token = new Token(TokenType.SLASH, c)
         break
       case '!':
         if (this.peekChar() === '=') {

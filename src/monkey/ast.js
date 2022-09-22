@@ -1,7 +1,10 @@
 export const NodeType = {
   Program: 'Program',
   LetStatement: 'LetStatement',
-  ReturnStatement: 'ReturnStatement',
+  ExpressionStatement: 'ExpressionStatement',
+
+  IntLiteral: 'IntLiteral',
+  Identifier: 'Identifier'
 }
 
 export class Node {
