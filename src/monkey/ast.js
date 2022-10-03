@@ -4,13 +4,13 @@ export const NodeType = {
   ExpressionStatement: 'ExpressionStatement',
 
   IntLiteral: 'IntLiteral',
-  Identifier: 'Identifier'
+  Identifier: 'Identifier',
 }
 
 export class Node {
-  constructor(type, text) {
+  constructor(type, value) {
     this.children = []
     this.type = type
-    this.text = text
+    this.value = value
   }
 }

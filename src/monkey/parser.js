@@ -88,30 +88,11 @@ class Parser {
     return res
   }
 
-  parseExpression() {
-    // 解析左节点
-    let leftNode = null
-    const next = this.tokensReader.peek()
-    if (next && next.type === TokenType.INT) {
-      leftNode = this.parseIntLiteral(next)
-    } else if (next && next.type === TokenType.IDENTIFIER) {
-      leftNode = this.parerIndentifier(next)
-    }
+  parseExpression() {}
 
-    if (!leftNode) return
+  parseIntLiteral() {}
 
-    return leftNode
-  }
-
-  parseIntLiteral(token) {
-    const node = new Node(NodeType.IntLiteral, token.text)
-    return node
-  }
-
-  parerIndentifier(token) {
-    const node = new Node(NodeType.Identifier, token.text)
-    return node
-  }
+  parerIndentifier() {}
 }
 
 export default Parser
