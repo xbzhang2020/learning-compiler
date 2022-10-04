@@ -109,7 +109,6 @@ export class Parser {
   }
 
   parseExpression(lastOperator = null) {
-    // 解析左节点
     let next = this.tokensReader.peek()
     let leftNode = null
     if (next && next.type in this.prefixParseFns) {
@@ -118,27 +117,19 @@ export class Parser {
     }
     if (!leftNode) return null
 
-    // 解析中缀操作符
     this.tokensReader.read()
-    next = this.tokensReader.peek()
-    let rightNode = null
-    if (
-      next &&
-      next.type in this.infixParseFns &&
-      this.greaterPrecedence(next.type, lastOperator)
-    ) {
-      this.tokensReader.read()
 
-      // 解析右节点
-      rightNode = this.parseExpression(next.type)
-      if (!rightNode) {
-        throw Error('找不到右节点')
+    while (next) {
+      next = this.tokensReader.peek()
+      if (
+        next &&
+        next.type in this.infixParseFns &&
+        this.greaterPrecedence(next.type, lastOperator)
+      ) {
+        leftNode = this.parseInfixExpression(leftNode)
+      } else {
+        break
       }
-
-      const node = new Node(NodeType.Expression, next.text)
-      node.children.push(leftNode)
-      node.children.push(rightNode)
-      return node
     }
 
     return leftNode
@@ -152,7 +143,20 @@ export class Parser {
 
   parerIndentifier() {}
 
-  parseInfixExpression() {}
+  parseInfixExpression(leftNode) {
+    if (!leftNode) {
+      throw Error('找不到左节点')
+    }
+    const next = this.tokensReader.peek()
+    this.tokensReader.read()
+
+    const rightNode = this.parseExpression(next.type)
+
+    const node = new Node(NodeType.Expression, next.text)
+    node.children.push(leftNode)
+    node.children.push(rightNode)
+    return node
+  }
 
   registerPrefixParseFn(tokenType, parseFn) {
     this.prefixParseFns[tokenType] = parseFn.bind(this)
@@ -167,7 +171,7 @@ export class Parser {
       ? this.precedences[operator]
       : this.precedences[operator] - this.precedences[lastOperator]
 
-    return res >= 0
+    return res > 0
   }
 }
 
