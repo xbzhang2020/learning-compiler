@@ -43,6 +43,7 @@ export class Parser {
     this.registerPrefixParseFn(TokenType.IDENTIFIER, this.parerIndentifier)
     this.registerPrefixParseFn(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.BANG, this.parsePrefixExpression)
+    this.registerPrefixParseFn(TokenType.LPAREN, this.parseGroupExpression)
 
     this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
@@ -162,7 +163,7 @@ export class Parser {
     const leftNode = this.parseExpression(Precedences.PREFIX)
 
     if (!leftNode) {
-      throw new Error('没有找到表达式左节点')
+      throw new Error('前缀表达式缺失左节点')
     }
     node.children.push(leftNode)
     return node
@@ -170,7 +171,7 @@ export class Parser {
 
   parseInfixExpression(leftNode) {
     if (!leftNode) {
-      throw Error('没有找到表达式左节点')
+      throw Error('中缀表达式缺失左节点')
     }
     const token = this.tokensReader.read()
     const rightNode = this.parseExpression(this.precedences[token.type])
@@ -178,6 +179,18 @@ export class Parser {
     const node = new Node(NodeType.Expression, token.text)
     node.children.push(leftNode)
     node.children.push(rightNode)
+    return node
+  }
+
+  parseGroupExpression() {
+    this.tokensReader.read()
+    const node = this.parseExpression()
+    const next = this.tokensReader.peek()
+    if (next && next.type === TokenType.RPAREN) {
+      this.tokensReader.read()
+    } else {
+      throw new Error('分组表达式缺失右括号')
+    }
     return node
   }
 

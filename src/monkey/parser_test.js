@@ -2,7 +2,7 @@ import Parser from './parser.js'
 import Lexer from './lexer.js'
 
 function test1() {
-  let input = '1 + 2 * 3'
+  let input = '(1 + 2) * (3 * 4) '
   // let input = 'let age = 18;'
   // let input = 'let age1 = 24;'
   //   let input = `
