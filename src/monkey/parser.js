@@ -122,21 +122,23 @@ export class Parser {
     this.tokensReader.read()
     next = this.tokensReader.peek()
     let rightNode = null
-    if (next && next.type in this.infixParseFns) {
+    if (
+      next &&
+      next.type in this.infixParseFns &&
+      this.greaterPrecedence(next.type, lastOperator)
+    ) {
       this.tokensReader.read()
 
-      if (this.greaterPrecedence(next.type, lastOperator)) {
-        // 解析右节点
-        rightNode = this.parseExpression(next.type)
-        if (!rightNode) {
-          throw Error('找不到右节点')
-        }
-
-        const node = new Node(NodeType.Expression, next.text)
-        node.children.push(leftNode)
-        node.children.push(rightNode)
-        return node
+      // 解析右节点
+      rightNode = this.parseExpression(next.type)
+      if (!rightNode) {
+        throw Error('找不到右节点')
       }
+
+      const node = new Node(NodeType.Expression, next.text)
+      node.children.push(leftNode)
+      node.children.push(rightNode)
+      return node
     }
 
     return leftNode
