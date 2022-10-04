@@ -4,6 +4,7 @@ export const NodeType = {
   ExpressionStatement: 'ExpressionStatement',
   BlockStatement: 'BlockStatement',
   IfStatement: 'IfStatement',
+  ReturnStatement: 'ReturnStatement',
 
   Expression: 'Expression',
   IntLiteral: 'IntLiteral',

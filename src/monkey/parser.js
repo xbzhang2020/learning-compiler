@@ -93,8 +93,12 @@ export class Parser {
     switch (this.tokensReader.peek().type) {
       case TokenType.LET:
         return this.parseLetStatement()
+      case TokenType.RETURN:
+        return this.parseReturnStatement()
       case TokenType.LBRACE:
         return this.parseBlockStatement()
+      case TokenType.IF:
+        return this.parseIfStatement()
       default:
         return this.parseExpressionStatement()
     }
@@ -118,18 +122,18 @@ export class Parser {
         if (exp) {
           node.children.push(exp)
         } else {
-          throw new Error('声明语句初始化失败，等号右侧缺失表达式')
+          throw new Error('let 声明语句初始化失败，等号右侧缺失表达式')
         }
       }
     } else {
-      throw new Error('声明语句缺失变量名')
+      throw new Error('let 声明语句缺失变量名')
     }
 
     next = this.tokensReader.peek()
     if (next && next.type === TokenType.SEMICOLON) {
       this.tokensReader.read()
     } else {
-      throw new Error('声明语句缺失分号')
+      throw new Error('let 声明语句缺失分号')
     }
 
     return node
@@ -150,6 +154,25 @@ export class Parser {
     return node
   }
 
+  parseReturnStatement() {
+    const node = new Node(NodeType.ReturnStatement, null)
+    this.tokensReader.read()
+
+    const exp = this.parseExpression()
+    if (!exp) {
+      throw new Error('return 语句缺失表达式')
+    }
+    node.children.push(exp)
+
+    const next = this.tokensReader.peek()
+    if (next && next.type === TokenType.SEMICOLON) {
+      this.tokensReader.read()
+    } else {
+      throw new Error('return 语句缺失分号')
+    }
+    return node
+  }
+
   parseBlockStatement() {
     const node = new Node(NodeType.BlockStatement, null)
     this.tokensReader.read()
@@ -159,8 +182,62 @@ export class Parser {
         this.tokensReader.read()
         break
       }
+
       const child = this.parseStatement()
+      if (!child) {
+        throw new Error('块语句解析失败')
+      }
       node.children.push(child)
+    }
+
+    return node
+  }
+
+  parseIfStatement() {
+    const node = new Node(NodeType.IfStatement, null)
+    this.tokensReader.read()
+
+    let next = this.tokensReader.peek()
+    if (!next || next.type !== TokenType.LPAREN) {
+      throw new Error('if 语句缺失左括号')
+    }
+
+    this.tokensReader.read()
+    const condition = this.parseExpression()
+    if (!condition) {
+      throw new Error('if 语句缺失条件表达式')
+    }
+    node.children.push(condition)
+
+    next = this.tokensReader.peek()
+    if (!next || next.type !== TokenType.RPAREN) {
+      throw new Error('if 语句缺失右括号')
+    }
+    this.tokensReader.read()
+
+    next = this.tokensReader.peek()
+    if (!next || next.type !== TokenType.LBRACE) {
+      throw new Error('if 语句缺失块语句')
+    }
+
+    const block = this.parseBlockStatement()
+    node.children.push(block)
+
+    // 可选的else
+    next = this.tokensReader.peek()
+    if (next && next.type === TokenType.ELSE) {
+      this.tokensReader.read()
+      next = this.tokensReader.peek()
+
+      if (next && next.type === TokenType.LBRACE) {
+        const block = this.parseBlockStatement()
+        node.children.push(block)
+      } else if (next && next.type === TokenType.IF) {
+        const stat = this.parseIfStatement()
+        node.children.push(stat)
+      } else {
+        throw new Error('else 语句解析错误')
+      }
     }
 
     return node
