@@ -53,7 +53,7 @@ class Lexer {
         token = new Token(TokenType.MINUS, c)
         break
       case '*':
-        token = new Token(TokenType.ASSIGNMENT, c)
+        token = new Token(TokenType.ASTERISK, c)
         break
       case '/':
         token = new Token(TokenType.SLASH, c)

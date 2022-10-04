@@ -20,10 +20,29 @@ export class TokensReader {
   }
 }
 
-class Parser {
+// 运算优先级
+const Precedences = {
+  LOWEST: 0,
+  SUM: 1,
+  PRODUCT: 2,
+}
+
+export class Parser {
   constructor(tokens) {
     this.tokens = tokens
     this.tokensReader = new TokensReader(tokens)
+
+    this.prefixParseFns = {}
+    this.infixParseFns = {}
+    this.precedences = {}
+
+    this.registerPrefixParseFn(TokenType.INT, this.parseIntLiteral)
+
+    this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
+
+    this.precedences[TokenType.PLUS] = Precedences.SUM
+    this.precedences[TokenType.ASTERISK] = Precedences.PRODUCT
   }
 
   parse() {
@@ -85,14 +104,69 @@ class Parser {
   parseExpressionStatement() {
     const res = this.parseExpression()
     // console.log('expression', res)
+    Node.dump(res)
     return res
   }
 
-  parseExpression() {}
+  parseExpression(lastOperator = null) {
+    // 解析左节点
+    let next = this.tokensReader.peek()
+    let leftNode = null
+    if (next && next.type in this.prefixParseFns) {
+      const prefix = this.prefixParseFns[next.type]
+      leftNode = prefix()
+    }
+    if (!leftNode) return null
 
-  parseIntLiteral() {}
+    // 解析中缀操作符
+    this.tokensReader.read()
+    next = this.tokensReader.peek()
+    let rightNode = null
+    if (next && next.type in this.infixParseFns) {
+      this.tokensReader.read()
+
+      if (this.greaterPrecedence(next.type, lastOperator)) {
+        // 解析右节点
+        rightNode = this.parseExpression(next.type)
+        if (!rightNode) {
+          throw Error('找不到右节点')
+        }
+
+        const node = new Node(NodeType.Expression, next.text)
+        node.children.push(leftNode)
+        node.children.push(rightNode)
+        return node
+      }
+    }
+
+    return leftNode
+  }
+
+  parseIntLiteral() {
+    const token = this.tokensReader.peek()
+    const node = new Node(NodeType.IntLiteral, token.text)
+    return node
+  }
 
   parerIndentifier() {}
+
+  parseInfixExpression() {}
+
+  registerPrefixParseFn(tokenType, parseFn) {
+    this.prefixParseFns[tokenType] = parseFn.bind(this)
+  }
+
+  registerInfixParseFn(tokenType, parseFn) {
+    this.infixParseFns[tokenType] = parseFn.bind(this)
+  }
+
+  greaterPrecedence(operator, lastOperator) {
+    const res = !lastOperator
+      ? this.precedences[operator]
+      : this.precedences[operator] - this.precedences[lastOperator]
+
+    return res >= 0
+  }
 }
 
 export default Parser
