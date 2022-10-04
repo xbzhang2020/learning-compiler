@@ -3,9 +3,10 @@ export const NodeType = {
   LetStatement: 'LetStatement',
   ExpressionStatement: 'ExpressionStatement',
 
+  Expression: 'Expression',
   IntLiteral: 'IntLiteral',
   Identifier: 'Identifier',
-  Expression: 'Expression',
+  Boolean: 'Boolean',
 }
 
 export class Node {

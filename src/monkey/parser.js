@@ -41,6 +41,8 @@ export class Parser {
 
     this.registerPrefixParseFn(TokenType.INT, this.parseIntegerLiteral)
     this.registerPrefixParseFn(TokenType.IDENTIFIER, this.parerIndentifier)
+    this.registerPrefixParseFn(TokenType.TRUE, this.parseBoolean)
+    this.registerPrefixParseFn(TokenType.FALSE, this.parseBoolean)
     this.registerPrefixParseFn(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.BANG, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.LPAREN, this.parseGroupExpression)
@@ -49,11 +51,23 @@ export class Parser {
     this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.MINUS, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.SLASH, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.EQUAL, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.NOT_EQUAL, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.LT, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.GT, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.LT_EQUAL, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.GT_EQUAL, this.parseInfixExpression)
 
     this.precedences[TokenType.PLUS] = Precedences.SUM
     this.precedences[TokenType.MINUS] = Precedences.SUM
     this.precedences[TokenType.ASTERISK] = Precedences.PRODUCT
     this.precedences[TokenType.SLASH] = Precedences.PRODUCT
+    this.precedences[TokenType.EQUAL] = Precedences.EQUALS
+    this.precedences[TokenType.NOT_EQUAL] = Precedences.EQUALS
+    this.precedences[TokenType.LT] = Precedences.LESSGREATER
+    this.precedences[TokenType.GT] = Precedences.LESSGREATER
+    this.precedences[TokenType.LT_EQUAL] = Precedences.LESSGREATER
+    this.precedences[TokenType.GT_EQUAL] = Precedences.LESSGREATER
   }
 
   parse() {
@@ -85,23 +99,23 @@ export class Parser {
 
   parseLetStatement() {
     // 消耗 let 关键字
-    let node = null
+    const node = new Node(NodeType.LetStatement, null)
+
     this.tokensReader.read()
     let next = this.tokensReader.peek()
 
     if (next && next.type === TokenType.IDENTIFIER) {
       // 消耗标识符
+      node.value = next.text
       this.tokensReader.read()
-      node = new Node(NodeType.LetStatement, next.text)
       next = this.tokensReader.peek()
       if (next && next.type === TokenType.ASSIGNMENT) {
-        // 消耗 =
         this.tokensReader.read()
         const exp = this.parseExpression()
         if (exp) {
           node.children.push(exp)
         } else {
-          throw new Error('声明语句初始化失败，缺失表达式')
+          throw new Error('声明语句初始化失败，等号右侧缺失表达式')
         }
       }
     } else {
@@ -119,10 +133,9 @@ export class Parser {
   }
 
   parseExpressionStatement() {
-    let node = null
+    const node = new Node(NodeType.ExpressionStatement, null)
     const exp = this.parseExpression()
     if (exp) {
-      node = new Node(NodeType.ExpressionStatement, null)
       node.children.push(exp)
     }
 
@@ -172,6 +185,12 @@ export class Parser {
     return node
   }
 
+  parseBoolean() {
+    const token = this.tokensReader.read()
+    const node = new Node(NodeType.Boolean, token.text)
+    return node
+  }
+
   parsePrefixExpression() {
     const token = this.tokensReader.read()
     const node = new Node(NodeType.Expression, token.type)
@@ -199,14 +218,14 @@ export class Parser {
 
   parseGroupExpression() {
     this.tokensReader.read()
-    const node = this.parseExpression()
+    const exp = this.parseExpression()
     const next = this.tokensReader.peek()
     if (next && next.type === TokenType.RPAREN) {
       this.tokensReader.read()
     } else {
       throw new Error('分组表达式缺失右括号')
     }
-    return node
+    return exp
   }
 
   registerPrefixParseFn(tokenType, parseFn) {
