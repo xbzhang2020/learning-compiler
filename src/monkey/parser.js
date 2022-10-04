@@ -23,9 +23,11 @@ export class TokensReader {
 // 运算优先级
 const Precedences = {
   LOWEST: 0,
-  SUM: 1,
-  PRODUCT: 2,
-  PREFIX: 3,
+  EQUALS: 1,
+  LESSGREATER: 2,
+  SUM: 3,
+  PRODUCT: 4,
+  PREFIX: 5,
 }
 
 export class Parser {
@@ -40,12 +42,17 @@ export class Parser {
     this.registerPrefixParseFn(TokenType.INT, this.parseIntegerLiteral)
     this.registerPrefixParseFn(TokenType.IDENTIFIER, this.parerIndentifier)
     this.registerPrefixParseFn(TokenType.MINUS, this.parsePrefixExpression)
+    this.registerPrefixParseFn(TokenType.BANG, this.parsePrefixExpression)
 
     this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.MINUS, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.SLASH, this.parseInfixExpression)
 
     this.precedences[TokenType.PLUS] = Precedences.SUM
+    this.precedences[TokenType.MINUS] = Precedences.SUM
     this.precedences[TokenType.ASTERISK] = Precedences.PRODUCT
+    this.precedences[TokenType.SLASH] = Precedences.PRODUCT
   }
 
   parse() {
