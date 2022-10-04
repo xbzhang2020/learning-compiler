@@ -2,9 +2,10 @@ export const NodeType = {
   Program: 'Program',
   LetStatement: 'LetStatement',
   ExpressionStatement: 'ExpressionStatement',
+  ReturnStatement: 'ReturnStatement',
+  AssignmentStatement: 'AssignmentStatement',
   BlockStatement: 'BlockStatement',
   IfStatement: 'IfStatement',
-  ReturnStatement: 'ReturnStatement',
 
   Expression: 'Expression',
   IntLiteral: 'IntLiteral',

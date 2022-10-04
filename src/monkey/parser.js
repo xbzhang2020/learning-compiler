@@ -14,6 +14,13 @@ export class TokensReader {
     return res
   }
 
+  unread() {
+    if (this.pos <= 0) return null
+    const res = this.tokens[this.pos]
+    this.pos--
+    return res
+  }
+
   peek() {
     if (this.pos >= this.tokens.length) return null
     return this.tokens[this.pos]
@@ -99,6 +106,8 @@ export class Parser {
         return this.parseBlockStatement()
       case TokenType.IF:
         return this.parseIfStatement()
+      case TokenType.IDENTIFIER:
+        return this.parseAssignmentStatement() || this.parseExpressionStatement()
       default:
         return this.parseExpressionStatement()
     }
@@ -170,6 +179,32 @@ export class Parser {
     } else {
       throw new Error('return 语句缺失分号')
     }
+    return node
+  }
+
+  parseAssignmentStatement() {
+    const token = this.tokensReader.read()
+    const node = new Node(NodeType.AssignmentStatement, token.text)
+    const next = this.tokensReader.peek()
+
+    if (next && next.type === TokenType.ASSIGNMENT) {
+      this.tokensReader.read()
+      const exp = this.parseExpression()
+      if (!exp) {
+        throw new Error('赋值语句缺失表达式')
+      }
+      node.children.push(exp)
+
+      const next = this.tokensReader.peek()
+      if (next && next.type === TokenType.SEMICOLON) {
+        this.tokensReader.read()
+      } else {
+        throw new Error('return 语句缺失分号')
+      }
+    } else {
+      this.tokensReader.unread()
+    }
+
     return node
   }
 
