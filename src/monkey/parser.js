@@ -101,7 +101,7 @@ export class Parser {
         if (exp) {
           node.children.push(exp)
         } else {
-          throw new Error('声明语句初始化失败，需要表达式')
+          throw new Error('声明语句初始化失败，缺失表达式')
         }
       }
     } else {
