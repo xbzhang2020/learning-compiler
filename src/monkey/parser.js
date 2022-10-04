@@ -166,7 +166,7 @@ export class Parser {
       throw Error('没有找到表达式左节点')
     }
     const token = this.tokensReader.read()
-    const rightNode = this.parseExpression(token.type)
+    const rightNode = this.parseExpression(this.precedences[token.type])
 
     const node = new Node(NodeType.Expression, token.text)
     node.children.push(leftNode)
@@ -182,9 +182,8 @@ export class Parser {
     this.infixParseFns[tokenType] = parseFn.bind(this)
   }
 
-  greaterPrecedence(precedence, curPrecedence = Precedences.LOWEST) {
+  greaterPrecedence(precedence, curPrecedence) {
     const res = precedence - curPrecedence
-
     return res > 0
   }
 }
