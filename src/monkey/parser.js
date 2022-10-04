@@ -113,8 +113,8 @@ export class Parser {
 
   parseExpression(curPrecedence = Precedences.LOWEST) {
     // 解析左节点
-    let next = this.tokensReader.peek()
     let leftNode = null
+    let next = this.tokensReader.peek()
     if (next && next.type in this.prefixParseFns) {
       const prefix = this.prefixParseFns[next.type]
       leftNode = prefix()
@@ -150,13 +150,12 @@ export class Parser {
   }
 
   parsePrefixExpression() {
-    const next = this.tokensReader.peek()
-    const node = new Node(NodeType.Expression, next.type)
-    this.tokensReader.read()
-
+    const token = this.tokensReader.read()
+    const node = new Node(NodeType.Expression, token.type)
     const leftNode = this.parseExpression(Precedences.PREFIX)
+
     if (!leftNode) {
-      throw new '没有找到表达式节点'()
+      throw new Error('没有找到表达式左节点')
     }
     node.children.push(leftNode)
     return node
@@ -164,10 +163,9 @@ export class Parser {
 
   parseInfixExpression(leftNode) {
     if (!leftNode) {
-      throw Error('找不到左节点')
+      throw Error('没有找到表达式左节点')
     }
     const token = this.tokensReader.read()
-
     const rightNode = this.parseExpression(token.type)
 
     const node = new Node(NodeType.Expression, token.text)
