@@ -63,60 +63,74 @@ export class Parser {
 
   parseProgram() {
     const node = new Node(NodeType.Program, null)
-    while (this.tokensReader.peek() !== null) {
+    while (this.tokensReader.peek()) {
       let child = null
 
       switch (this.tokensReader.peek().type) {
-        // case TokenType.LET:
-        //   child = this.parseLetStatement()
-        //   break
+        case TokenType.LET:
+          child = this.parseLetStatement()
+          break
         default:
           child = this.parseExpressionStatement()
       }
 
       if (child) {
         node.children.push(child)
+      } else {
+        this.tokensReader.read()
       }
-
-      this.tokensReader.read()
     }
     return node
   }
 
-  parseLetStatement(tokens) {
-    // 消耗 let 关键词
-    tokens.read()
+  parseLetStatement() {
+    // 消耗 let 关键字
     let node = null
-    let next = tokens.peek()
+    this.tokensReader.read()
+    let next = this.tokensReader.peek()
 
     if (next && next.type === TokenType.IDENTIFIER) {
       // 消耗标识符
-      tokens.read()
+      this.tokensReader.read()
       node = new Node(NodeType.LetStatement, next.text)
-      next = tokens.peek()
+      next = this.tokensReader.peek()
       if (next && next.type === TokenType.ASSIGNMENT) {
         // 消耗 =
-        tokens.read()
-        next = tokens.peek()
-        if (next) {
-          // 解析表达式
+        this.tokensReader.read()
+        const exp = this.parseExpression()
+        if (exp) {
+          node.children.push(exp)
         } else {
-          throw new Error(
-            'invalide variable initialization, expecting an expression'
-          )
+          throw new Error('声明语句初始化失败，需要表达式')
         }
       }
     } else {
-      throw new Error('variable name expected')
+      throw new Error('声明语句缺失变量名')
     }
+
+    next = this.tokensReader.peek()
+    if (next && next.type === TokenType.SEMICOLON) {
+      this.tokensReader.read()
+    } else {
+      throw new Error('声明语句缺失分号')
+    }
+
     return node
   }
 
   parseExpressionStatement() {
-    const res = this.parseExpression()
-    // console.log('expression', res)
-    Node.dump(res)
-    return res
+    let node = null
+    const exp = this.parseExpression()
+    if (exp) {
+      node = new Node(NodeType.ExpressionStatement, null)
+      node.children.push(exp)
+    }
+
+    const next = this.tokensReader.peek()
+    if (next && next.type === TokenType.SEMICOLON) {
+      this.tokensReader.read()
+    }
+    return node
   }
 
   parseExpression(curPrecedence = Precedences.LOWEST) {
@@ -133,6 +147,7 @@ export class Parser {
       next = this.tokensReader.peek()
       if (
         next &&
+        next.type !== TokenType.SEMICOLON &&
         next.type in this.infixParseFns &&
         this.greaterPrecedence(this.precedences[next.type], curPrecedence)
       ) {
