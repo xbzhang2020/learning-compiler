@@ -183,11 +183,12 @@ export class Parser {
   }
 
   parseAssignmentStatement() {
+    let node = null
     const token = this.tokensReader.read()
-    const node = new Node(NodeType.AssignmentStatement, token.text)
-    const next = this.tokensReader.peek()
+    let next = this.tokensReader.peek()
 
     if (next && next.type === TokenType.ASSIGNMENT) {
+      node = new Node(NodeType.AssignmentStatement, token.text)
       this.tokensReader.read()
       const exp = this.parseExpression()
       if (!exp) {
@@ -195,14 +196,15 @@ export class Parser {
       }
       node.children.push(exp)
 
-      const next = this.tokensReader.peek()
+      next = this.tokensReader.peek()
       if (next && next.type === TokenType.SEMICOLON) {
         this.tokensReader.read()
       } else {
-        throw new Error('return 语句缺失分号')
+        throw new Error('赋值语句缺失分号')
       }
     } else {
       this.tokensReader.unread()
+      console.log(this.tokensReader.peek())
     }
 
     return node

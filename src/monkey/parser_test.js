@@ -19,7 +19,7 @@ function test1() {
   //   } else {
   //     return 3;
   //   }`
-  let input = 'res =  1 + 2 * 3;'
+  let input = 'res = a + 2 * 3;'
 
   const lexer = new Lexer(input)
   const tokens = lexer.tokenize()
