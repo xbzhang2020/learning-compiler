@@ -78,23 +78,26 @@ export class Parser {
   parseProgram() {
     const node = new Node(NodeType.Program, null)
     while (this.tokensReader.peek()) {
-      let child = null
-
-      switch (this.tokensReader.peek().type) {
-        case TokenType.LET:
-          child = this.parseLetStatement()
-          break
-        default:
-          child = this.parseExpressionStatement()
-      }
-
+      const child = this.parseStatement()
       if (child) {
         node.children.push(child)
       } else {
-        this.tokensReader.read()
+        const token = this.tokensReader.read()
+        console.log('构造 AST 失败：', token.text)
       }
     }
     return node
+  }
+
+  parseStatement() {
+    switch (this.tokensReader.peek().type) {
+      case TokenType.LET:
+        return this.parseLetStatement()
+      case TokenType.LBRACE:
+        return this.parseBlockStatement()
+      default:
+        return this.parseExpressionStatement()
+    }
   }
 
   parseLetStatement() {
@@ -133,16 +136,33 @@ export class Parser {
   }
 
   parseExpressionStatement() {
-    const node = new Node(NodeType.ExpressionStatement, null)
     const exp = this.parseExpression()
-    if (exp) {
-      node.children.push(exp)
-    }
+
+    if (!exp) return null
+
+    const node = new Node(NodeType.ExpressionStatement, null)
+    node.children.push(exp)
 
     const next = this.tokensReader.peek()
     if (next && next.type === TokenType.SEMICOLON) {
       this.tokensReader.read()
     }
+    return node
+  }
+
+  parseBlockStatement() {
+    const node = new Node(NodeType.BlockStatement, null)
+    this.tokensReader.read()
+
+    while (this.tokensReader.peek()) {
+      if (this.tokensReader.peek().type === TokenType.RBARCE) {
+        this.tokensReader.read()
+        break
+      }
+      const child = this.parseStatement()
+      node.children.push(child)
+    }
+
     return node
   }
 

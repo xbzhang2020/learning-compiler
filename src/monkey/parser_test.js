@@ -5,7 +5,9 @@ import { Node } from './ast.js'
 function test1() {
   // let input = '1 * 2 + 3 * 4'
   // let input = 'let age1 = 24;'
-  let input = 'let a = 1;'
+  // let input = 'let a = 1;'
+  let input = '{1 + 2; let a = 3 + 4;} 111;'
+
   //   let input = `
   //   let age = 20;
   //   if(age >= 18) {

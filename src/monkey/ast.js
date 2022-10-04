@@ -2,6 +2,8 @@ export const NodeType = {
   Program: 'Program',
   LetStatement: 'LetStatement',
   ExpressionStatement: 'ExpressionStatement',
+  BlockStatement: 'BlockStatement',
+  IfStatement: 'IfStatement',
 
   Expression: 'Expression',
   IntLiteral: 'IntLiteral',
