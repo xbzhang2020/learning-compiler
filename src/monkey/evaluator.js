@@ -1,5 +1,5 @@
 import { NodeType } from './ast.js'
-import object, { ObjectType, isInteger } from './object.js'
+import object, { isInteger, isBoolean } from './object.js'
 
 export class Evaluator {
   eval(node) {
@@ -14,6 +14,8 @@ export class Evaluator {
         return this.eval(node.children[0])
       case NodeType.BlockStatement:
         return this.evalBlockStatement(node)
+      case NodeType.IfStatement:
+        return this.evalIfStatement(node)
       case NodeType.IntLiteral:
         return new object.Integer(node.value)
       case NodeType.Boolean:
@@ -35,7 +37,7 @@ export class Evaluator {
   evalPrefixExpression(operator, right) {
     switch (operator) {
       case '-':
-        if (right && right.type === ObjectType.INTEGER_OBJ) {
+        if (isInteger(right)) {
           return new object.Integer(-right.value)
         }
         throw new Error('前缀表达式计算失败')
@@ -97,6 +99,17 @@ export class Evaluator {
       }
     }
     return new object.Null()
+  }
+
+  evalIfStatement(node) {
+    const condition = this.eval(node.children[0])
+    if (!isBoolean(condition)) {
+      throw new Error('if 语句条件表达式计算失败')
+    }
+    if (condition.value) {
+      return this.eval(node.children[1])
+    }
+    return this.eval(node.children[2])
   }
 }
 

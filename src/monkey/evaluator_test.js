@@ -29,8 +29,8 @@ function test1() {
   // let input = '1 * 2 - 3;'
   // let input = '1 + 2 == 2 + 1;'
   // let input = 'return 2;'
-  let input = '{1; return 2;}'
-  // let input = 'if(10 > 0) {return 1;} else {return 2;}'
+  // let input = '{1; return 2;}'
+  let input = 'if(10 > 0) {return 1;} else {return 2;}'
   const res = myEval(input)
   print(res)
 }

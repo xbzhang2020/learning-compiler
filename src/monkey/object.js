@@ -26,6 +26,10 @@ export function isInteger(value) {
   return value && value.type === ObjectType.INTEGER_OBJ
 }
 
+export function isBoolean(value) {
+  return value && value.type === ObjectType.BOOLEAN_OBJ
+}
+
 class Integer extends BaseObject {
   constructor(value) {
     super(ObjectType.INTEGER_OBJ, Number(value))
