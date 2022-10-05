@@ -56,29 +56,17 @@ export class Parser {
     this.registerPrefixParseFn(TokenType.LPAREN, this.parseGroupExpression)
     this.registerPrefixParseFn(TokenType.FUNCTION, this.parseFunctionLiteral)
 
-    this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.MINUS, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.SLASH, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.EQUAL, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.NOT_EQUAL, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.LT, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.GT, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.LT_EQUAL, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.GT_EQUAL, this.parseInfixExpression)
-    this.registerInfixParseFn(TokenType.LPAREN, this.parseCallExpression)
-
-    this.precedences[TokenType.PLUS] = Precedences.SUM
-    this.precedences[TokenType.MINUS] = Precedences.SUM
-    this.precedences[TokenType.ASTERISK] = Precedences.PRODUCT
-    this.precedences[TokenType.SLASH] = Precedences.PRODUCT
-    this.precedences[TokenType.EQUAL] = Precedences.EQUALS
-    this.precedences[TokenType.NOT_EQUAL] = Precedences.EQUALS
-    this.precedences[TokenType.LT] = Precedences.LESSGREATER
-    this.precedences[TokenType.GT] = Precedences.LESSGREATER
-    this.precedences[TokenType.LT_EQUAL] = Precedences.LESSGREATER
-    this.precedences[TokenType.GT_EQUAL] = Precedences.LESSGREATER
-    this.precedences[TokenType.LPAREN] = Precedences.CALL
+    this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression, Precedences.SUM)
+    this.registerInfixParseFn(TokenType.MINUS, this.parseInfixExpression, Precedences.SUM)
+    this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression, Precedences.PRODUCT)
+    this.registerInfixParseFn(TokenType.SLASH, this.parseInfixExpression, Precedences.PRODUCT)
+    this.registerInfixParseFn(TokenType.EQUAL, this.parseInfixExpression, Precedences.EQUALS)
+    this.registerInfixParseFn(TokenType.NOT_EQUAL, this.parseInfixExpression, Precedences.EQUALS)
+    this.registerInfixParseFn(TokenType.LT, this.parseInfixExpression, Precedences.LESSGREATER)
+    this.registerInfixParseFn(TokenType.GT, this.parseInfixExpression, Precedences.LESSGREATER)
+    this.registerInfixParseFn(TokenType.LT_EQUAL, this.parseInfixExpression, Precedences.LESSGREATER)
+    this.registerInfixParseFn(TokenType.GT_EQUAL, this.parseInfixExpression, Precedences.LESSGREATER)
+    this.registerInfixParseFn(TokenType.LPAREN, this.parseCallExpression, Precedences.CALL)
   }
 
   parse() {
@@ -463,8 +451,9 @@ export class Parser {
     this.prefixParseFns[tokenType] = parseFn.bind(this)
   }
 
-  registerInfixParseFn(tokenType, parseFn) {
+  registerInfixParseFn(tokenType, parseFn, precedence) {
     this.infixParseFns[tokenType] = parseFn.bind(this)
+    this.precedences[tokenType] = precedence
   }
 
   greaterPrecedence(precedence, curPrecedence) {

@@ -20,8 +20,8 @@ function test1() {
   //     return 3;
   //   }`
   // let input = 'res = a + 2 * 3;'
-  // let input = 'let a = function(x,y) { return x + y; }'
-  let input = 'fn();'
+  let input = 'let a = function(x,y) { return x + y; }'
+  // let input = 'fn();'
 
   const lexer = new Lexer(input)
   const tokens = lexer.tokenize()
