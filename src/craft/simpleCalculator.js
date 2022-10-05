@@ -28,9 +28,7 @@ export class SimpleCalculator {
           if (child) {
             node.appendChild(child)
           } else {
-            throw new Error(
-              'invalide variable initialization, expecting an expression'
-            )
+            throw new Error('invalide variable initialization, expecting an expression')
           }
         }
       } else {
@@ -68,9 +66,7 @@ export class SimpleCalculator {
         node.appendChild(child1)
         node.appendChild(child2)
       } else {
-        throw new Error(
-          'invalid additive expression, expecting the right part.'
-        )
+        throw new Error('invalid additive expression, expecting the right part.')
       }
     }
 
@@ -98,9 +94,7 @@ export class SimpleCalculator {
         node.appendChild(child1)
         node.appendChild(child2)
       } else {
-        throw new Error(
-          'invalid multiplicative expression, expecting the right part.'
-        )
+        throw new Error('invalid multiplicative expression, expecting the right part.')
       }
     }
 

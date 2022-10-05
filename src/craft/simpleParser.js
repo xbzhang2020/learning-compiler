@@ -92,9 +92,7 @@ export class SimpleParser {
           if (child) {
             node.appendChild(child)
           } else {
-            throw new Error(
-              'invalide variable initialization, expecting an expression'
-            )
+            throw new Error('invalide variable initialization, expecting an expression')
           }
         }
       } else {
@@ -140,9 +138,7 @@ export class SimpleParser {
             throw new Error('invalid assign statement, expecting semicolon')
           }
         } else {
-          throw new Error(
-            'invalide variable initialization, expecting an expression'
-          )
+          throw new Error('invalide variable initialization, expecting an expression')
         }
       } else {
         tokens.unread()
@@ -185,11 +181,7 @@ export class SimpleParser {
 
     // 循环算法，保证了结合性
     let child1 = node
-    while (
-      child1 &&
-      token &&
-      (token.type === TokenType.Plus || token.type === TokenType.Minus)
-    ) {
+    while (child1 && token && (token.type === TokenType.Plus || token.type === TokenType.Minus)) {
       tokens.read()
       const child2 = this.multiplicative(tokens)
       if (child2) {
@@ -199,9 +191,7 @@ export class SimpleParser {
         child1 = node
         token = tokens.peek()
       } else {
-        throw new Error(
-          'invalid additive expression, expecting the right part.'
-        )
+        throw new Error('invalid additive expression, expecting the right part.')
       }
     }
 
@@ -240,11 +230,7 @@ export class SimpleParser {
 
     // 循环算法，保证了结合性
     let child1 = node
-    while (
-      child1 &&
-      token &&
-      (token.type === TokenType.Star || token.type === TokenType.Slash)
-    ) {
+    while (child1 && token && (token.type === TokenType.Star || token.type === TokenType.Slash)) {
       tokens.read()
       const child2 = this.primary(tokens)
       if (child2) {
@@ -254,9 +240,7 @@ export class SimpleParser {
         child1 = node
         token = tokens.peek()
       } else {
-        throw new Error(
-          'invalid additive expression, expecting the right part.'
-        )
+        throw new Error('invalid additive expression, expecting the right part.')
       }
     }
 
