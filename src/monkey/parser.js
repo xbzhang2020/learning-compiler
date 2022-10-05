@@ -35,6 +35,7 @@ const Precedences = {
   SUM: 3,
   PRODUCT: 4,
   PREFIX: 5,
+  CALL: 6,
 }
 
 export class Parser {
@@ -65,6 +66,7 @@ export class Parser {
     this.registerInfixParseFn(TokenType.GT, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.LT_EQUAL, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.GT_EQUAL, this.parseInfixExpression)
+    this.registerInfixParseFn(TokenType.LPAREN, this.parseCallExpression)
 
     this.precedences[TokenType.PLUS] = Precedences.SUM
     this.precedences[TokenType.MINUS] = Precedences.SUM
@@ -76,6 +78,7 @@ export class Parser {
     this.precedences[TokenType.GT] = Precedences.LESSGREATER
     this.precedences[TokenType.LT_EQUAL] = Precedences.LESSGREATER
     this.precedences[TokenType.GT_EQUAL] = Precedences.LESSGREATER
+    this.precedences[TokenType.LPAREN] = Precedences.CALL
   }
 
   parse() {
@@ -296,7 +299,8 @@ export class Parser {
         next.type in this.infixParseFns &&
         this.greaterPrecedence(this.precedences[next.type], curPrecedence)
       ) {
-        leftNode = this.parseInfixExpression(leftNode)
+        const infix = this.infixParseFns[next.type]
+        leftNode = infix(leftNode)
       } else {
         break
       }
@@ -392,7 +396,7 @@ export class Parser {
       if (token.type === TokenType.IDENTIFIER) {
         paramters.push(token.text)
       } else {
-        throw Error('解析函数参数列表失败')
+        throw Error('函数参数列表解析失败')
       }
 
       next = this.tokensReader.peek()
@@ -411,6 +415,48 @@ export class Parser {
     }
 
     return paramters
+  }
+
+  parseCallExpression(leftNode) {
+    if (!leftNode) {
+      throw Error('函数调用表达式缺失函数名')
+    }
+    const node = new Node(NodeType.CallExpression, '')
+    node.children.push(leftNode)
+
+    const args = this.parseCallArguments()
+    node.children.push(...args)
+
+    return node
+  }
+
+  parseCallArguments() {
+    const args = []
+    this.tokensReader.read()
+    let next = this.tokensReader.peek()
+
+    while (next && next.type !== TokenType.RPAREN) {
+      const exp = this.parseExpression()
+      if (exp) {
+        args.push(exp)
+      }
+
+      next = this.tokensReader.peek()
+      if (next && next.type === TokenType.COMMA) {
+        this.tokensReader.read()
+        next = this.tokensReader.peek()
+      } else {
+        break
+      }
+    }
+
+    if (next && next.type === TokenType.RPAREN) {
+      this.tokensReader.read()
+    } else {
+      throw new Error('函数调用参数列表缺失右括号')
+    }
+
+    return args
   }
 
   registerPrefixParseFn(tokenType, parseFn) {
