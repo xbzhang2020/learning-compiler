@@ -23,7 +23,8 @@ function print(res) {
 }
 
 function test1() {
-  let input = '10;'
+  // let input = '1;'
+  let input = '-20;'
   const res = myEval(input)
   print(res)
 }

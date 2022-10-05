@@ -8,6 +8,8 @@ export const NodeType = {
   IfStatement: 'IfStatement',
 
   Expression: 'Expression',
+  PrefixExpression: 'PrefixExpression',
+  InfixExpression: 'InfixExpression',
   IntLiteral: 'IntLiteral',
   Identifier: 'Identifier',
   Boolean: 'Boolean',

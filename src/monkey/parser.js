@@ -317,7 +317,7 @@ export class Parser {
 
   parsePrefixExpression() {
     const token = this.tokensReader.read()
-    const node = new Node(NodeType.Expression, token.type)
+    const node = new Node(NodeType.PrefixExpression, token.type)
     const leftNode = this.parseExpression(Precedences.PREFIX)
 
     if (!leftNode) {
@@ -334,7 +334,7 @@ export class Parser {
     const token = this.tokensReader.read()
     const rightNode = this.parseExpression(this.precedences[token.type])
 
-    const node = new Node(NodeType.Expression, token.text)
+    const node = new Node(NodeType.InfixExpression, token.text)
     node.children.push(leftNode)
     node.children.push(rightNode)
     return node
