@@ -10,6 +10,10 @@ export class Evaluator {
         return node.children.map((item) => this.eval(item))
       case NodeType.ExpressionStatement:
         return this.eval(node.children[0])
+      case NodeType.ReturnStatement:
+        return this.eval(node.children[0])
+      case NodeType.BlockStatement:
+        return this.evalBlockStatement(node)
       case NodeType.IntLiteral:
         return new object.Integer(node.value)
       case NodeType.Boolean:
@@ -82,6 +86,17 @@ export class Evaluator {
       default:
         throw new Error(`未知的中缀运算符：${operator}`)
     }
+  }
+
+  evalBlockStatement(node) {
+    for (let i = 0; i < node.children.length; i++) {
+      const item = node.children[i]
+      const res = this.eval(item)
+      if (item.type === NodeType.ReturnStatement) {
+        return res
+      }
+    }
+    return new object.Null()
   }
 }
 

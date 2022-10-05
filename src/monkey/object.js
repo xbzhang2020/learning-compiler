@@ -39,8 +39,8 @@ class Boolean extends BaseObject {
 }
 
 class Null extends BaseObject {
-  constructor(value) {
-    super(ObjectType.NULL_OBJ, value)
+  constructor() {
+    super(ObjectType.NULL_OBJ, null)
   }
 }
 
