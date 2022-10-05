@@ -1,4 +1,11 @@
 import Lexer from './lexer.js'
+import repl from './repl.js'
+
+function tokenize(input) {
+  const lexer = new Lexer(input)
+  lexer.tokenize()
+  return lexer.tokens
+}
 
 function test1() {
   // let input = 'let age = 18;'
@@ -10,9 +17,13 @@ function test1() {
   } else {
     return false
   }`
-  const lexer = new Lexer(input)
-  lexer.tokenize()
-  console.log(lexer)
+  const res = tokenize(input)
+  console.log(res)
 }
 
-test1()
+function test2() {
+  repl(tokenize)
+}
+
+// test1()
+test2()

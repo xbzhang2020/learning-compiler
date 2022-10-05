@@ -1,6 +1,19 @@
 import Parser from './parser.js'
 import Lexer from './lexer.js'
 import { Node } from './ast.js'
+import repl from './repl.js'
+
+function parse(input) {
+  const lexer = new Lexer(input)
+  const tokens = lexer.tokenize()
+  const parser = new Parser(tokens)
+  const res = parser.parse()
+  return res
+}
+
+function print(ast) {
+  Node.dump(ast)
+}
 
 function test1() {
   // let input = '1 * 2 + 3 * 4'
@@ -23,13 +36,13 @@ function test1() {
   let input = 'let a = function(x,y) { return x + y; }'
   // let input = 'fn();'
 
-  const lexer = new Lexer(input)
-  const tokens = lexer.tokenize()
-  // console.log(tokens)
-
-  const parser = new Parser(tokens)
-  const res = parser.parse()
-  Node.dump(res)
+  const res = parse(input)
+  print(res)
 }
 
-test1()
+function test2() {
+  repl(parse, print)
+}
+
+// test1()
+test2()
