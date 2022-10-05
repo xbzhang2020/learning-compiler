@@ -1,5 +1,5 @@
 import { NodeType } from './ast.js'
-import object, { ObjectType } from './object.js'
+import object, { ObjectType, isInteger } from './object.js'
 
 export class Evaluator {
   eval(node) {
@@ -18,6 +18,11 @@ export class Evaluator {
         const right = this.eval(node.children[0])
         return this.evalPrefixExpression(node.value, right)
       }
+      case NodeType.InfixExpression: {
+        const left = this.eval(node.children[0])
+        const right = this.eval(node.children[1])
+        return this.evalInfixExpression(node.value, left, right)
+      }
       default:
         return null
     }
@@ -29,14 +34,53 @@ export class Evaluator {
         if (right && right.type === ObjectType.INTEGER_OBJ) {
           return new object.Integer(-right.value)
         }
-        throw new Error('前缀表达式计算出错')
+        throw new Error('前缀表达式计算失败')
       case '!':
         if (right) {
           return new object.Boolean(false)
         }
         return new object.Boolean(true)
       default:
-        throw new Error('未知的前缀运算符')
+        throw new Error(`未知的前缀运算符：${operator}`)
+    }
+  }
+
+  evalInfixExpression(operator, left, right) {
+    switch (operator) {
+      case '+':
+        if (isInteger(left) && isInteger(right)) {
+          return new object.Integer(left.value + right.value)
+        }
+        throw new Error('中缀表达式计算失败')
+      case '-':
+        if (isInteger(left) && isInteger(right)) {
+          return new object.Integer(left - right)
+        }
+        throw new Error('中缀表达式计算失败')
+      case '*':
+        if (isInteger(left) && isInteger(right)) {
+          return new object.Integer(left * right)
+        }
+        throw new Error('中缀表达式计算失败')
+      case '/':
+        if (isInteger(left) && isInteger(right)) {
+          return new object.Integer(left / right)
+        }
+        throw new Error('中缀表达式计算失败')
+      case '==':
+        return new object.Boolean(left.value === right.value)
+      case '!=':
+        return new object.Boolean(left.value !== right.value)
+      case '<':
+        return new object.Boolean(left.value < right.value)
+      case '>':
+        return new object.Boolean(left.value > right.value)
+      case '<=':
+        return new object.Boolean(left.value <= right.value)
+      case '>=':
+        return new object.Boolean(left.value >= right.value)
+      default:
+        throw new Error(`未知的中缀运算符：${operator}`)
     }
   }
 }

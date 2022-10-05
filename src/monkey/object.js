@@ -22,6 +22,10 @@ export class BaseObject {
   }
 }
 
+export function isInteger(value) {
+  return value && value.type === ObjectType.INTEGER_OBJ
+}
+
 class Integer extends BaseObject {
   constructor(value) {
     super(ObjectType.INTEGER_OBJ, Number(value))

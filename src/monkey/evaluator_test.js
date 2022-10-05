@@ -8,7 +8,7 @@ function myEval(input) {
   const tokens = lexer.tokenize()
   const parser = new Parser(tokens)
   const ast = parser.parse()
-  Node.dump(ast)
+  // Node.dump(ast)
   const evaluator = new Evaluator()
   const res = evaluator.eval(ast)
   return res
@@ -24,7 +24,10 @@ function print(res) {
 
 function test1() {
   // let input = '1;'
-  let input = '-20;'
+  // let input = 'true;'
+  // let input = '-20;'
+  // let input = '1 * 2 - 3;'
+  let input = '1 + 2 == 2 + 1;'
   const res = myEval(input)
   print(res)
 }
