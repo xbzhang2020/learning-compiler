@@ -1,5 +1,5 @@
 import { TokenType } from './token.js'
-import { Node, NodeType } from './ast.js'
+import { Node, NodeType, FunctionLiteralNode } from './ast.js'
 
 export class TokensReader {
   constructor(tokens) {
@@ -53,6 +53,7 @@ export class Parser {
     this.registerPrefixParseFn(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.BANG, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.LPAREN, this.parseGroupExpression)
+    this.registerPrefixParseFn(TokenType.FUNCTION, this.parseFunctionLiteral)
 
     this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixParseFn(TokenType.ASTERISK, this.parseInfixExpression)
@@ -83,7 +84,7 @@ export class Parser {
   }
 
   parseProgram() {
-    const node = new Node(NodeType.Program, null)
+    const node = new Node(NodeType.Program, '')
     while (this.tokensReader.peek()) {
       const child = this.parseStatement()
       if (child) {
@@ -115,7 +116,7 @@ export class Parser {
 
   parseLetStatement() {
     // 消耗 let 关键字
-    const node = new Node(NodeType.LetStatement, null)
+    const node = new Node(NodeType.LetStatement, '')
 
     this.tokensReader.read()
     let next = this.tokensReader.peek()
@@ -131,7 +132,7 @@ export class Parser {
         if (exp) {
           node.children.push(exp)
         } else {
-          throw new Error('let 声明语句初始化失败，等号右侧缺失表达式')
+          throw new Error('let 声明语句初始化失败，等号右侧缺失表达式或表达式解析失败')
         }
       }
     } else {
@@ -141,8 +142,6 @@ export class Parser {
     next = this.tokensReader.peek()
     if (next && next.type === TokenType.SEMICOLON) {
       this.tokensReader.read()
-    } else {
-      throw new Error('let 声明语句缺失分号')
     }
 
     return node
@@ -153,7 +152,7 @@ export class Parser {
 
     if (!exp) return null
 
-    const node = new Node(NodeType.ExpressionStatement, null)
+    const node = new Node(NodeType.ExpressionStatement, '')
     node.children.push(exp)
 
     const next = this.tokensReader.peek()
@@ -164,7 +163,7 @@ export class Parser {
   }
 
   parseReturnStatement() {
-    const node = new Node(NodeType.ReturnStatement, null)
+    const node = new Node(NodeType.ReturnStatement, '')
     this.tokensReader.read()
 
     const exp = this.parseExpression()
@@ -204,14 +203,13 @@ export class Parser {
       }
     } else {
       this.tokensReader.unread()
-      console.log(this.tokensReader.peek())
     }
 
     return node
   }
 
   parseBlockStatement() {
-    const node = new Node(NodeType.BlockStatement, null)
+    const node = new Node(NodeType.BlockStatement, '')
     this.tokensReader.read()
 
     while (this.tokensReader.peek()) {
@@ -231,7 +229,7 @@ export class Parser {
   }
 
   parseIfStatement() {
-    const node = new Node(NodeType.IfStatement, null)
+    const node = new Node(NodeType.IfStatement, '')
     this.tokensReader.read()
 
     let next = this.tokensReader.peek()
@@ -360,6 +358,59 @@ export class Parser {
       throw new Error('分组表达式缺失右括号')
     }
     return exp
+  }
+
+  parseFunctionLiteral() {
+    this.tokensReader.read()
+    const node = new FunctionLiteralNode(NodeType.FunctionLiteral, '', [])
+
+    let next = this.tokensReader.peek()
+    if (next && next.type === TokenType.LPAREN) {
+      const paramters = this.parseFunctionParameters()
+      node.appendParameters(...paramters)
+    } else {
+      throw new Error('函数缺失参数列表')
+    }
+
+    next = this.tokensReader.peek()
+    if (next && next.type === TokenType.LBRACE) {
+      const block = this.parseBlockStatement()
+      node.children.push(block)
+    } else {
+      throw new Error('函数缺失函数体')
+    }
+    return node
+  }
+
+  parseFunctionParameters() {
+    const paramters = []
+    this.tokensReader.read()
+    let next = this.tokensReader.peek()
+
+    while (next && next.type !== TokenType.RPAREN) {
+      const token = this.tokensReader.read()
+      if (token.type === TokenType.IDENTIFIER) {
+        paramters.push(token.text)
+      } else {
+        throw Error('解析函数参数列表失败')
+      }
+
+      next = this.tokensReader.peek()
+      if (next && next.type === TokenType.COMMA) {
+        this.tokensReader.read()
+        next = this.tokensReader.peek()
+      } else {
+        break
+      }
+    }
+
+    if (next && next.type === TokenType.RPAREN) {
+      this.tokensReader.read()
+    } else {
+      throw new Error('函数参数列表缺失右括号')
+    }
+
+    return paramters
   }
 
   registerPrefixParseFn(tokenType, parseFn) {
