@@ -10,7 +10,7 @@ function myEval(input) {
   const ast = parser.parse()
   Node.dump(ast)
   const evaluator = new Evaluator()
-  const res = evaluator.eval(ast)
+  const res = evaluator.start(ast)
   return res
 }
 
@@ -30,7 +30,10 @@ function test1() {
   // let input = '1 + 2 == 2 + 1;'
   // let input = 'return 2;'
   // let input = '{1; return 2;}'
-  let input = 'if(10 > 0) {return 1;} else {return 2;}'
+  // let input = 'if(10 > 0) {return 1;} else {return 2;}'
+  // let input = 'let a = 5;'
+  // let input = 'let a; a = 10;'
+  let input = 'let a = 10; 2 * a + 5;'
   const res = myEval(input)
   print(res)
 }

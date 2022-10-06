@@ -1,32 +1,62 @@
 import { NodeType } from './ast.js'
 import object, { isInteger, isBoolean } from './object.js'
-
+import Environment from './environment.js'
 export class Evaluator {
-  eval(node) {
+  start(root) {
+    const env = new Environment()
+    return this.eval(root, env)
+  }
+
+  eval(node, env) {
     if (!node) return null
 
     switch (node.type) {
       case NodeType.Program:
-        return node.children.map((item) => this.eval(item))
+        return node.children.map((item) => this.eval(item, env))
       case NodeType.ExpressionStatement:
-        return this.eval(node.children[0])
+        return this.eval(node.children[0], env)
       case NodeType.ReturnStatement:
-        return this.eval(node.children[0])
+        return this.eval(node.children[0], env)
+      case NodeType.LetStatement: {
+        const res = this.eval(node.children[0], env)
+        const name = node.value
+        if (env.has(name)) {
+          throw new Error(`重复声明变量 ${name}`)
+        }
+        env.set(name, res)
+        return
+      }
+      case NodeType.AssignmentStatement: {
+        const res = this.eval(node.children[0], env)
+        const name = node.value
+        if (!env.has(name)) {
+          throw new Error(`未声明变量 ${name}`)
+        }
+        env.set(name, res)
+        return res
+      }
       case NodeType.BlockStatement:
-        return this.evalBlockStatement(node)
+        return this.evalBlockStatement(node, env)
       case NodeType.IfStatement:
-        return this.evalIfStatement(node)
+        return this.evalIfStatement(node, env)
       case NodeType.IntLiteral:
         return new object.Integer(node.value)
       case NodeType.Boolean:
         return new object.Boolean(node.value)
+      case NodeType.Identifier: {
+        const name = node.value
+        if (!env.has(name)) {
+          throw new Error(`未找到变量 ${name}`)
+        }
+        return env.get(name)
+      }
       case NodeType.PrefixExpression: {
-        const right = this.eval(node.children[0])
+        const right = this.eval(node.children[0], env)
         return this.evalPrefixExpression(node.value, right)
       }
       case NodeType.InfixExpression: {
-        const left = this.eval(node.children[0])
-        const right = this.eval(node.children[1])
+        const left = this.eval(node.children[0], env)
+        const right = this.eval(node.children[1], env)
         return this.evalInfixExpression(node.value, left, right)
       }
       default:
@@ -90,10 +120,10 @@ export class Evaluator {
     }
   }
 
-  evalBlockStatement(node) {
+  evalBlockStatement(node, env) {
     for (let i = 0; i < node.children.length; i++) {
       const item = node.children[i]
-      const res = this.eval(item)
+      const res = this.eval(item, env)
       if (item.type === NodeType.ReturnStatement) {
         return res
       }
@@ -101,15 +131,15 @@ export class Evaluator {
     return new object.Null()
   }
 
-  evalIfStatement(node) {
-    const condition = this.eval(node.children[0])
+  evalIfStatement(node, env) {
+    const condition = this.eval(node.children[0], env)
     if (!isBoolean(condition)) {
       throw new Error('if 语句条件表达式计算失败')
     }
     if (condition.value) {
-      return this.eval(node.children[1])
+      return this.eval(node.children[1], env)
     }
-    return this.eval(node.children[2])
+    return this.eval(node.children[2], env)
   }
 }
 
