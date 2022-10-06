@@ -2,6 +2,7 @@ export const ObjectType = {
   NULL_OBJ: 'NULL',
   INTEGER_OBJ: 'INTEGER',
   BOOLEAN_OBJ: 'BOOLEAN',
+  STRING_OBJ: 'STRING',
 
   ERROR_OBJ: 'ERROR',
   FUNCTION_OBJ: 'FUNCTION',
@@ -34,6 +35,10 @@ export function isFunction(value) {
   return value && value.type === ObjectType.FUNCTION_OBJ
 }
 
+export function isString(value) {
+  return value && value.type === ObjectType.STRING_OBJ
+}
+
 class Integer extends BaseObject {
   constructor(value) {
     super(ObjectType.INTEGER_OBJ, Number(value))
@@ -43,6 +48,12 @@ class Integer extends BaseObject {
 class Boolean extends BaseObject {
   constructor(value) {
     super(ObjectType.BOOLEAN_OBJ, value)
+  }
+}
+
+class String extends BaseObject {
+  constructor(value) {
+    super(ObjectType.STRING_OBJ, value)
   }
 }
 
@@ -66,6 +77,7 @@ export default {
   Object: BaseObject,
   Integer,
   Boolean,
+  String,
   Null,
   Function,
 }

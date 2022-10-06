@@ -33,9 +33,9 @@ function test1() {
   //     return 3;
   //   }`
   // let input = 'res = a + 2 * 3;'
-  let input = 'let a = function(x,y) { return x + y; }'
+  // let input = 'let a = function(x,y) { return x + y; }'
   // let input = 'fn();'
-
+  let input = `"hello " + "world"`
   const res = parse(input)
   print(res)
 }
@@ -44,5 +44,5 @@ function test2() {
   repl(parse, print)
 }
 
-// test1()
-test2()
+test1()
+// test2()

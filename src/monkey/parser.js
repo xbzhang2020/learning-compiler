@@ -48,13 +48,14 @@ export class Parser {
     this.precedences = {}
 
     this.registerPrefixParseFn(TokenType.INT, this.parseIntegerLiteral)
-    this.registerPrefixParseFn(TokenType.IDENTIFIER, this.parerIndentifier)
+    this.registerPrefixParseFn(TokenType.IDENTIFIER, this.parseIndentifier)
     this.registerPrefixParseFn(TokenType.TRUE, this.parseBoolean)
     this.registerPrefixParseFn(TokenType.FALSE, this.parseBoolean)
     this.registerPrefixParseFn(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.BANG, this.parsePrefixExpression)
     this.registerPrefixParseFn(TokenType.LPAREN, this.parseGroupExpression)
     this.registerPrefixParseFn(TokenType.FUNCTION, this.parseFunctionLiteral)
+    this.registerPrefixParseFn(TokenType.STRING, this.parseStringLiteral)
 
     this.registerInfixParseFn(TokenType.PLUS, this.parseInfixExpression, Precedences.SUM)
     this.registerInfixParseFn(TokenType.MINUS, this.parseInfixExpression, Precedences.SUM)
@@ -303,7 +304,7 @@ export class Parser {
     return node
   }
 
-  parerIndentifier() {
+  parseIndentifier() {
     const token = this.tokensReader.read()
     const node = new Node(NodeType.Identifier, token.text)
     return node
@@ -312,6 +313,12 @@ export class Parser {
   parseBoolean() {
     const token = this.tokensReader.read()
     const node = new Node(NodeType.Boolean, token.text)
+    return node
+  }
+
+  parseStringLiteral() {
+    const token = this.tokensReader.read()
+    const node = new Node(NodeType.StringLiteral, token.text)
     return node
   }
 

@@ -1,5 +1,5 @@
 import { NodeType } from './ast.js'
-import object, { isInteger, isBoolean, isFunction } from './object.js'
+import object, { isInteger, isBoolean, isFunction, isString } from './object.js'
 import Environment from './environment.js'
 
 export class Evaluator {
@@ -52,6 +52,8 @@ export class Evaluator {
         return new object.Integer(node.value)
       case NodeType.Boolean:
         return new object.Boolean(node.value)
+      case NodeType.StringLiteral:
+        return new object.String(node.value)
       case NodeType.Identifier:
         return this.evalIndentifier(node, env)
       case NodeType.PrefixExpression:
@@ -93,6 +95,9 @@ export class Evaluator {
       case '+':
         if (isInteger(left) && isInteger(right)) {
           return new object.Integer(left.value + right.value)
+        }
+        if (isString(left) && isString(right)) {
+          return new object.String(left.value + right)
         }
         throw new Error('中缀表达式计算失败')
       case '-':

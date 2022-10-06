@@ -4,6 +4,7 @@ export const TokenType = {
 
   IDENTIFIER: 'IDENTIFIER', // 标识符
   INT: 'INT', // 整型
+  STRING: 'STRING', // 字符串
 
   // 运算符
   ASSIGNMENT: '=',

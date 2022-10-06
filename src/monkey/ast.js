@@ -12,6 +12,7 @@ export const NodeType = {
   InfixExpression: 'InfixExpression',
   IntLiteral: 'IntLiteral',
   Identifier: 'Identifier',
+  StringLiteral: 'StringLiteral',
   Boolean: 'Boolean',
   FunctionLiteral: 'FunctionLiteral',
   CallExpression: 'CallExpression',

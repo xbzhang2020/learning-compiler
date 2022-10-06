@@ -108,6 +108,16 @@ class Lexer {
       case ';':
         token = new Token(TokenType.SEMICOLON, c)
         break
+      case '"': {
+        token = new Token(TokenType.STRING, '')
+        while (this.peekChar() && this.peekChar() !== '"') {
+          token.appendText(this.readChar())
+        }
+        if (this.peekChar() === '"') {
+          this.readChar()
+        }
+        break
+      }
       default:
         if (isBlank(c)) {
           this.skipWhitespace()
