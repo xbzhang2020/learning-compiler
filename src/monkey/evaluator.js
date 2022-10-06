@@ -1,10 +1,14 @@
 import { NodeType } from './ast.js'
-import object, { isInteger, isBoolean } from './object.js'
+import object, { isInteger, isBoolean, isFunction } from './object.js'
 import Environment from './environment.js'
+
 export class Evaluator {
+  constructor() {
+    this.env = new Environment() // 顶级上下文
+  }
+
   start(root) {
-    const env = new Environment()
-    return this.eval(root, env)
+    return this.eval(root, this.env)
   }
 
   eval(node, env) {
@@ -20,7 +24,7 @@ export class Evaluator {
       case NodeType.LetStatement: {
         const res = this.eval(node.children[0], env)
         const name = node.value
-        if (env.has(name)) {
+        if (env.hasOwnKey(name)) {
           throw new Error(`重复声明变量 ${name}`)
         }
         env.set(name, res)
@@ -39,32 +43,32 @@ export class Evaluator {
         return this.evalBlockStatement(node, env)
       case NodeType.IfStatement:
         return this.evalIfStatement(node, env)
+      case NodeType.FunctionLiteral: {
+        const parameters = node.parameters
+        const body = node.children[0]
+        return new object.Function(parameters, body, env)
+      }
       case NodeType.IntLiteral:
         return new object.Integer(node.value)
       case NodeType.Boolean:
         return new object.Boolean(node.value)
-      case NodeType.Identifier: {
-        const name = node.value
-        if (!env.has(name)) {
-          throw new Error(`未找到变量 ${name}`)
-        }
-        return env.get(name)
-      }
-      case NodeType.PrefixExpression: {
-        const right = this.eval(node.children[0], env)
-        return this.evalPrefixExpression(node.value, right)
-      }
-      case NodeType.InfixExpression: {
-        const left = this.eval(node.children[0], env)
-        const right = this.eval(node.children[1], env)
-        return this.evalInfixExpression(node.value, left, right)
-      }
+      case NodeType.Identifier:
+        return this.evalIndentifier(node, env)
+      case NodeType.PrefixExpression:
+        return this.evalPrefixExpression(node, env)
+      case NodeType.InfixExpression:
+        return this.evalInfixExpression(node, env)
+      case NodeType.CallExpression:
+        return this.evalCallExpression(node, env)
       default:
         return null
     }
   }
 
-  evalPrefixExpression(operator, right) {
+  evalPrefixExpression(node, env) {
+    const operator = node.value
+    const right = this.eval(node.children[0], env)
+
     switch (operator) {
       case '-':
         if (isInteger(right)) {
@@ -81,7 +85,10 @@ export class Evaluator {
     }
   }
 
-  evalInfixExpression(operator, left, right) {
+  evalInfixExpression(node, env) {
+    const operator = node.value
+    const left = this.eval(node.children[0], env)
+    const right = this.eval(node.children[1], env)
     switch (operator) {
       case '+':
         if (isInteger(left) && isInteger(right)) {
@@ -118,6 +125,37 @@ export class Evaluator {
       default:
         throw new Error(`未知的中缀运算符：${operator}`)
     }
+  }
+
+  evalCallExpression(node, env) {
+    const fn = this.eval(node.children[0], env)
+    if (!isFunction(fn)) {
+      throw new Error(`变量不能作为函数被调用`)
+    }
+
+    // 解析参数列表
+    const args = []
+    for (let i = 1; i < node.children.length; i++) {
+      const arg = this.eval(node.children[i], env)
+      args.push(arg)
+    }
+
+    // 设置环境参数
+    const enclosedEnv = new Environment(fn.env) // 注意，这里是fn的上下文
+    for (let i = 0; i < fn.parameters.length; i++) {
+      enclosedEnv.set(fn.parameters[i], args[i])
+    }
+
+    // 执行函数体
+    return this.eval(fn.body, enclosedEnv)
+  }
+
+  evalIndentifier(node, env) {
+    const name = node.value
+    if (!env.has(name)) {
+      throw new Error(`未找到变量 ${name}`)
+    }
+    return env.get(name)
   }
 
   evalBlockStatement(node, env) {

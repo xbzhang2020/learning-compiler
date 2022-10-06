@@ -30,6 +30,10 @@ export function isBoolean(value) {
   return value && value.type === ObjectType.BOOLEAN_OBJ
 }
 
+export function isFunction(value) {
+  return value && value.type === ObjectType.FUNCTION_OBJ
+}
+
 class Integer extends BaseObject {
   constructor(value) {
     super(ObjectType.INTEGER_OBJ, Number(value))
@@ -48,10 +52,20 @@ class Null extends BaseObject {
   }
 }
 
+class Function extends BaseObject {
+  constructor(parameters, body, env) {
+    super(ObjectType.FUNCTION_OBJ, null)
+    this.parameters = parameters || []
+    this.body = body
+    this.env = env
+  }
+}
+
 export default {
+  ObjectType,
   Object: BaseObject,
   Integer,
   Boolean,
   Null,
-  ObjectType,
+  Function,
 }
