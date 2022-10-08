@@ -33,7 +33,8 @@ function test1() {
   // let input = 'let a = 10; 2 * a + 5;'
   // let input = 'let fn = function(x,y){return x + y;} fn(1,2);'
   // let input = 'let y = 10; let fn = function(x){let y = 1; return x + y;} fn(1);'
-  let input = `"hello " + "world!"`
+  // let input = `"hello " + "world!"`
+  let input = 'len("123")'
   const ast = parse(input)
   const evaluator = new Evaluator()
   const res = evaluator.start(ast)

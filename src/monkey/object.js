@@ -6,6 +6,7 @@ export const ObjectType = {
 
   ERROR_OBJ: 'ERROR',
   FUNCTION_OBJ: 'FUNCTION',
+  BUILTIN_OBJ: 'BUILTIN',
 }
 
 export class BaseObject {
@@ -63,6 +64,13 @@ class Null extends BaseObject {
   }
 }
 
+export class Builtin extends BaseObject {
+  constructor(fn) {
+    super(ObjectType.BUILTIN_OBJ, null)
+    this.fn = fn
+  }
+}
+
 class Function extends BaseObject {
   constructor(parameters, body, env) {
     super(ObjectType.FUNCTION_OBJ, null)
@@ -80,4 +88,5 @@ export default {
   String,
   Null,
   Function,
+  Builtin,
 }

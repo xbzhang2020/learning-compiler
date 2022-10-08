@@ -1,5 +1,6 @@
 import { NodeType } from './ast.js'
 import object, { isInteger, isBoolean, isFunction, isString } from './object.js'
+import builtins from './builtins.js'
 import Environment from './environment.js'
 
 export class Evaluator {
@@ -134,15 +135,20 @@ export class Evaluator {
 
   evalCallExpression(node, env) {
     const fn = this.eval(node.children[0], env)
-    if (!isFunction(fn)) {
-      throw new Error(`变量不能作为函数被调用`)
-    }
 
     // 解析参数列表
     const args = []
     for (let i = 1; i < node.children.length; i++) {
       const arg = this.eval(node.children[i], env)
       args.push(arg)
+    }
+
+    if (!isFunction(fn)) {
+      // 是否为内置函数
+      if (fn && fn.type === object.ObjectType.BUILTIN_OBJ) {
+        return fn.fn(...args)
+      }
+      throw new Error(`变量不能作为函数被调用`)
     }
 
     // 设置环境参数
@@ -157,10 +163,16 @@ export class Evaluator {
 
   evalIndentifier(node, env) {
     const name = node.value
-    if (!env.has(name)) {
-      throw new Error(`未找到变量 ${name}`)
+    console.log(name)
+
+    if (env.has(name)) {
+      return env.get(name)
     }
-    return env.get(name)
+
+    if (name in builtins) {
+      return builtins[name]
+    }
+    throw new Error(`未找到变量 ${name}`)
   }
 
   evalBlockStatement(node, env) {
